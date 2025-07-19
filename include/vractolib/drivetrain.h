@@ -4,7 +4,7 @@
 #include "main.h"
 #include "pros/motor_group.hpp"
 
-namespace vractoliib {
+namespace vractolib {
     class Drivetrain {
         private:
             pros::MotorGroup &leftMotors;

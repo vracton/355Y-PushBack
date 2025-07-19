@@ -1,8 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-namespace config {
-    const int deadzone;
+namespace vconfig {
+    const int deadzone = 10;
 }
 
 #endif
