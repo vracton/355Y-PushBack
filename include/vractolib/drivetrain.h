@@ -13,8 +13,7 @@ namespace vractolib {
             void arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt);
         
         public:
-            Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right) 
-                : leftMotors(left), rightMotors(right) {}
+            Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right);
             
             void arcade(pros::Controller controller, std::function<int(int)> mappedVolt);
             void arcadeDoubleStick(pros::Controller controller, std::function<int(int)> mappedVolt);

@@ -13,12 +13,12 @@ namespace vractolib {
         prevError = 0;
     }
 
-    void PID::setTarget(double NewTarget) {
-        target = NewTarget;
+    void PID::setTarget(double newTarget) {
+        target = newTarget;
         reset();
     }
 
-    double PID::updated(double at) {
+    double PID::update(double at) {
         const uint32_t curTime = pros::millis();
         const double error = target - at;
 

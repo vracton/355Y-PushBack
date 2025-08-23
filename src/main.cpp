@@ -1,5 +1,5 @@
 #include "main.h"
-#include "vractolib.h"
+#include "vractolib/vractolib.h"
 using namespace pros;
 
 //drive motors
@@ -42,7 +42,6 @@ int mappedVoltage(int controllerVal) {
 
 void opcontrol() {
 	while (true) {
-		//drivebase control
 		dt.arcade(master, mappedVoltage);
 
 		delay(20);

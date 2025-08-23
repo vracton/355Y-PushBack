@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #ifndef PID_H
 #define PID_H
 
@@ -18,15 +20,14 @@ namespace vractolib {
             double target = 0;
 
         public:
-            PID(double kP = 0, double kI = 0, double kD = 0) : gains{kP, kI, kD} {};
-
-            PID(PIDGains gains) : gains(gains) {};
+            PID(double kP = 0, double kI = 0, double kD = 0);
+            PID(PIDGains gains);
 
             void reset();
 
-            void setTarget(double NewTarget);
+            void setTarget(double newTarget);
 
-            double updated(double at);
+            double update(double at);
     };
 }
 
