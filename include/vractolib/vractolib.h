@@ -5,6 +5,9 @@
 
 #include "vractolib/config.h"
 #include "vractolib/drivetrain.h"
-#include "vractolib/pid.h"
+
+#include "vractolib/utils/pid.h"
+
+#include "vractolib/algos/odom/trackingWheel.h"
 
 #endif

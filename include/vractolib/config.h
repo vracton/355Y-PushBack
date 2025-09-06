@@ -4,6 +4,7 @@
 namespace vconfig {
     const int maxVel = 90;
     const int deadzone = 10;
+    const int odomUpdateRate = 10; //ms
 }
 
 #endif

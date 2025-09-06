@@ -1,5 +1,4 @@
-#include "vractolib/pid.h"
-#include "pros/rtos.hpp"
+#include "vractolib/utils/pid.h"
 
 namespace vractolib {
     PID::PID(double kP, double kI, double kD) 

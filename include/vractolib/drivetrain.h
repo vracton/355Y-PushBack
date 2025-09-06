@@ -1,8 +1,8 @@
-#ifndef DRIVETRAIN_H
-#define DRIVETRAIN_H
-
 #include "main.h"
 #include "pros/motor_group.hpp"
+
+#ifndef DRIVETRAIN_H
+#define DRIVETRAIN_H
 
 namespace vractolib {
     class Drivetrain {

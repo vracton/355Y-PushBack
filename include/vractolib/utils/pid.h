@@ -1,4 +1,5 @@
 #include <cstdint>
+#include "pros/rtos.hpp"
 
 #ifndef PID_H
 #define PID_H
