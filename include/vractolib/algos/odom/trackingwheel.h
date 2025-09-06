@@ -6,20 +6,21 @@
 
 namespace vractolib {
     class TrackingWheel {
-        private:
-            pros::Rotation &encoder;
-            double diameter;
-            double offset;
+    private:
+        pros::Rotation &encoder;
+        double diameter;
+        double offset;
 
-            double lastTotal;
+        double lastTotal;
 
-            double getPosDegrees();
-        public:
-            TrackingWheel(pros::Rotation &enc, double diam);
+        double getPosDegrees();
+    public:
+        TrackingWheel(pros::Rotation &enc, double diam);
 
-            double getDelta();
-            double getOffset();
-            void reset();
+        double getDelta();
+        double getOffset();
+        void reset();
+        void calibrate();
     };
 }
 

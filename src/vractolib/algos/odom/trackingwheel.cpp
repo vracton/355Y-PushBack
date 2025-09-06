@@ -19,7 +19,12 @@ namespace vractolib {
         return offset;
     }
 
+    void TrackingWheel::calibrate() {
+        TrackingWheel::reset();
+    }
+
     void TrackingWheel::reset() {
         encoder.reset_position();
+        lastTotal = 0;
     }
 }
