@@ -7,7 +7,9 @@
 #include "vractolib/drivetrain.h"
 
 #include "vractolib/utils/pid.h"
+#include "vractolib/utils/units/vector3d.h"
 
 #include "vractolib/algos/odom/trackingWheel.h"
+#include "vractolib/algos/odom/imu.h"
 
 #endif
