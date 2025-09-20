@@ -1,8 +1,8 @@
+#include "pros/rotation.hpp"
+#include "vractolib/utils/units/angles.h"
+
 #ifndef TRACKING_WHEEL_H
 #define TRACKING_WHEEL_H
-
-#include "main.h"
-#include "pros/rotation.hpp"
 
 namespace vractolib {
     class TrackingWheel {

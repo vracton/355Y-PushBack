@@ -2,6 +2,7 @@
 #define VRACTOLIB_H
 
 #include <algorithm>
+#include <vector>
 
 #include "vractolib/config.h"
 #include "vractolib/drivetrain.h"

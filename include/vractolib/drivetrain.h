@@ -1,5 +1,5 @@
-#include "main.h"
 #include "pros/motor_group.hpp"
+#include "vractolib/config.h"
 
 #ifndef DRIVETRAIN_H
 #define DRIVETRAIN_H

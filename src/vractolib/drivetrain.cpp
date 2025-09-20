@@ -1,6 +1,4 @@
 #include "vractolib/drivetrain.h"
-#include "vractolib/config.h"
-#include "main.h"
 
 namespace vractolib {
     Drivetrain::Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right) : leftMotors(left), rightMotors(right) { }
