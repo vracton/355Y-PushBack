@@ -13,6 +13,9 @@ namespace vractolib {
 
         double lastTotal;
 
+        /*
+            Gets the current position of the tracking wheel in radians.
+        */
         double getPos();
     public:
         TrackingWheel(pros::Rotation &enc, double diam);

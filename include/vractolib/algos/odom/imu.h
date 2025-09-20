@@ -15,6 +15,9 @@ namespace vractolib {
         IMU(pros::IMU &imuSensor) : imu(imuSensor), useYaw(true), lastHeading(0) { };
         IMU(pros::IMU &imuSensor, bool useYaw) : imu(imuSensor), useYaw(useYaw), lastHeading(0) { };
 
+        /*
+            Gets the current heading of the IMU in radians.
+        */
         double getHeading();
         double getDelta();
         vunits::Vector3D<double> getLinearAccel();
