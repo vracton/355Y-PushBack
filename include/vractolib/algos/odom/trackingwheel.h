@@ -13,7 +13,7 @@ namespace vractolib {
 
         double lastTotal;
 
-        double getPosDegrees();
+        double getPos();
     public:
         TrackingWheel(pros::Rotation &enc, double diam);
 

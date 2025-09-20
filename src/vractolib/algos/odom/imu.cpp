@@ -2,14 +2,16 @@
 
 namespace vractolib {
     double IMU::getHeading() {
+        double heading;
         if (useYaw) {
-            return imu.get_heading();
+            heading = imu.get_heading();
         } else {
-            return imu.get_rotation();
+            heading = imu.get_rotation();
         }
+        return vunits::degToRad(heading);
     }
 
-    double IMU::getDeltaHeading() {
+    double IMU::getDelta() {
         double currentHeading = getHeading();
         double delta = currentHeading - lastHeading;
         lastHeading = currentHeading;
