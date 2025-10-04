@@ -12,7 +12,7 @@ namespace vractolib {
         double cur = getPos();
         double delta = cur - lastTotal;
         lastTotal = cur;
-        return delta / 2 * diameter;
+        return delta * (diameter / 2.0);
     }
 
     double TrackingWheel::getOffset() {

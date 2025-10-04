@@ -8,7 +8,7 @@ namespace vractolib {
         } else {
             heading = imu.get_rotation();
         }
-        return vunits::degToRad(heading);
+        return vunits::degToRad(heading) - offset;
     }
 
     double IMU::getDelta() {
@@ -26,5 +26,9 @@ namespace vractolib {
     void IMU::calibrate() {
         imu.reset();
         lastHeading = getHeading();
+    }
+
+    void IMU::reset() {
+        IMU::calibrate();
     }
 }

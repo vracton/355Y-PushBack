@@ -9,7 +9,7 @@ namespace vractolib {
     private:
         pros::Rotation &encoder;
         double diameter;
-        double offset;
+        double offset; //offset from tracking center
 
         double lastTotal;
 
