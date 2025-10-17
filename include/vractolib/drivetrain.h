@@ -24,7 +24,7 @@ namespace vractolib {
         void init();
 
         //basic auton
-        void turnTo(double angle, int maxVolt = vconfig::maxVolt);
+        void turnTo(double angle, int timeout = 3000, int settleTime = 250, int maxVolt = vconfig::maxVolt);
 
         //control methods
         void arcade(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);

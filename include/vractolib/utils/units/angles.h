@@ -3,6 +3,7 @@
 
 namespace vunits {
 	constexpr double PI = 3.141592653589793;
+	constexpr double TAU = 2.0 * PI;
 
 	constexpr double degToRad(double degrees) {
 		return degrees * (PI / 180.0);
