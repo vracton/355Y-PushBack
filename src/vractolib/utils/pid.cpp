@@ -7,14 +7,19 @@ namespace vractolib {
     PID::PID(PIDGains gains) 
         : gains(gains), integral(0), prevError(0), target(0) {};
 
+    void PID::init() {
+        PID::reset();
+    }
+
     void PID::reset() {
         integral = 0;
         prevError = 0;
+        lastTime = pros::millis();
     }
 
     void PID::setTarget(double newTarget) {
         target = newTarget;
-        reset();
+        PID::reset();
     }
 
     double PID::update(double at) {

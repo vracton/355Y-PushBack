@@ -25,6 +25,7 @@ namespace vractolib {
             PID(PIDGains gains);
 
             void reset();
+            void init();
 
             void setTarget(double newTarget);
 

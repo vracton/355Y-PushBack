@@ -1,8 +1,20 @@
 #include "vractolib/drivetrain.h"
 
 namespace vractolib {
-    Drivetrain::Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right) : leftMotors(left), rightMotors(right) { }
+    Drivetrain::Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right, vractolib::PIDGains latGains, vractolib::PIDGains turnGains, vractolib::OdomManager odomManager) : leftMotors(left), rightMotors(right), latPID(latGains), turnPID(turnGains), odom(odomManager) { };
+    
+    int Drivetrain::linearVoltMap(int input) {
+        // [-127, 127] -> [-12000, 12000]
+        return std::min(input / 127.0 * 12000.0, 12000.0 / 100.0 * vconfig::maxVel);
+    }
 
+    void Drivetrain::init() {
+        latPID.init();
+        turnPID.init();
+        odom.init();
+    }
+
+    //control
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
         if (abs(forward) > vconfig::deadzone) {
             leftMotors.move_voltage(mappedVolt(forward));
@@ -44,6 +56,15 @@ namespace vractolib {
             rightMotors.move_voltage(mappedVolt(rightY));
         } else {
             rightMotors.move_voltage(0);
+        }
+    }
+
+    //basic auton
+    void Drivetrain::turnTo(double angle, int maxVolt) {
+        turnPID.setTarget(vunits::degToRad(angle));
+
+        while (true) {
+            
         }
     }
 }

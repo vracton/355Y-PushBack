@@ -2,9 +2,11 @@
 #define CONFIG_H
 
 namespace vconfig {
-    const int maxVel = 90;
+    const int maxPercent = 90;
+    const int maxVel = 1 * maxPercent;
+    const int maxVolt = 120 * maxPercent;
     const int deadzone = 10;
-    const int odomUpdateRate = 10; //ms
+    const int updateRate = 10; //ms
 }
 
 #endif

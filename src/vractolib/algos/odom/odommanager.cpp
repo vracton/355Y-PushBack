@@ -1,6 +1,8 @@
 #include "vractolib/algos/odom/odommanager.h"
 
 namespace vractolib {
+	OdomManager::OdomManager(std::vector<TrackingWheel> hWheels, std::vector<TrackingWheel> vWheels, IMU imu) : horizWheels(hWheels), vertWheels(vWheels), imu(imu), pose{0.0, 0.0, 0.0} { }
+
 	void OdomManager::init() {
 		OdomManager::reset();
 	}

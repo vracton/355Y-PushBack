@@ -11,6 +11,7 @@
 #include "vractolib/utils/pid.h"
 
 #include "vractolib/utils/units/vector3d.h"
+#include "vractolib/utils/units/angles.h"
 #include "vractolib/utils/units/pose.h"
 
 #include "vractolib/algos/odom/odommanager.h"

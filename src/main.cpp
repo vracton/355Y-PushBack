@@ -12,8 +12,25 @@ Motor intakeHigh(2, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 //controller
 Controller master(E_CONTROLLER_MASTER);
 
-vractolib::Drivetrain dt(driveleft, driveRight);
+//pid gains
+vractolib::PIDGains latGains = {1.0, 0.0, 0.8};
+vractolib::PIDGains turnGains = {1.0, 0.0, 0.8};
 
+//sensors
+Rotation horizEnc(6);
+Rotation vertEnc(7);
+vractolib::TrackingWheel horiz(horizEnc, 3.25);
+vractolib::TrackingWheel vert(vertEnc, 3.25);
+std::vector<vractolib::TrackingWheel> horizWheels = {horiz};
+std::vector<vractolib::TrackingWheel> vertWheels = {vert};
+IMU imuSensor(20);
+vractolib::IMU imu(imuSensor, 0.0);
+
+//odom init
+vractolib::OdomManager odom(horizWheels, vertWheels, imu);
+
+//drivetrain init
+vractolib::Drivetrain dt(driveleft, driveRight, latGains, turnGains, odom);
 
 void on_center_button() {
 	static bool pressed = false;
@@ -30,6 +47,14 @@ void initialize() {
 	lcd::set_text(1, "Salutations!");
 
 	lcd::register_btn1_cb(on_center_button);
+
+	dt.init();
+	Task task{[] {
+		while (true) {
+			odom.update();
+			delay(vconfig::updateRate);
+		}
+	}};
 }
 
 void disabled() {}
@@ -38,15 +63,10 @@ void competition_initialize() {}
 
 void autonomous() {} //imagine having auton
 
-int mappedVoltage(int controllerVal) {
-	// [-127, 127] -> [-12000, 12000]
-	return std::min(controllerVal / 127.0 * 12000.0, 12000.0 / 100.0 * vconfig::maxVel);
-}
-
 void opcontrol() {
 	while (true) {
 		//drive
-		dt.arcade(master, mappedVoltage);
+		dt.arcade(master);
 
 		//intake
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {

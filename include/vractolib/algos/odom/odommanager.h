@@ -19,7 +19,7 @@ namespace vractolib {
 		vunits::Pose LastDelta; //last delta values (for mcl)
 
 		public:
-		OdomManager(std::vector<TrackingWheel> hWheels, std::vector<TrackingWheel> vWheels, IMU imu) : horizWheels(hWheels), vertWheels(vWheels), imu(imu), pose{0.0, 0.0, 0.0} { };
+		OdomManager(std::vector<TrackingWheel> hWheels, std::vector<TrackingWheel> vWheels, IMU imu);
 
 		void init();
 		void reset();
