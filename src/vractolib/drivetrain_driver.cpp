@@ -16,12 +16,13 @@ namespace vractolib {
     }
 
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
-        if (abs(forward) > vconfig::deadzone) {
-            leftMotors.move_voltage(mappedVolt(forward));
-            rightMotors.move_voltage(mappedVolt(forward));
-        } else if (abs(turn) > vconfig::deadzone) {
+        // figure out smooth chaining between each other
+        if (abs(turn) > vconfig::deadzone) {
             leftMotors.move_voltage(mappedVolt(turn));
             rightMotors.move_voltage(-mappedVolt(turn));
+        } else if (abs(forward) > vconfig::deadzone) {
+            leftMotors.move_voltage(mappedVolt(forward));
+            rightMotors.move_voltage(mappedVolt(forward));
         } else {
             leftMotors.move_voltage(0);
             rightMotors.move_voltage(0);
@@ -36,8 +37,8 @@ namespace vractolib {
     }
 
     void Drivetrain::arcadeDoubleStick(pros::Controller controller, std::function<int(int)> mappedVolt) {
-        int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
 
         arcade_handle_input(leftY, rightX, mappedVolt);
     }
