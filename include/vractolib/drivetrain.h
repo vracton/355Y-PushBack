@@ -16,6 +16,7 @@ namespace vractolib {
         vractolib::OdomManager odom;
 
         void arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt);
+        void cheese_handle_input(int forward, int curve, std::function<int(int)> mappedVolt);
         static int linearVoltMap(int input);
 
         public:
@@ -30,6 +31,7 @@ namespace vractolib {
         void arcade(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);
         void arcadeDoubleStick(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);
         void tank(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);
+        void cheese(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);
     };
 }
 

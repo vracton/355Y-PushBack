@@ -43,16 +43,17 @@ void on_center_button() {
 	pressed = !pressed;
 	if (pressed) {
 		isBlue = !isBlue;
+		lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
 		pros::delay(500);
 	}
-
-	lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
 }
 
 void initialize() {
 	lcd::initialize();
 	lcd::set_text(1, "Salutations!");
 
+	lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
+	ldd::set_text(3, "color sort subsytem not running")
 	lcd::register_btn1_cb(on_center_button);
 
 	dt.init();
@@ -70,13 +71,15 @@ void competition_initialize() {}
 
 void autonomous() {} //imagine having auton
 
+int spinDir = 0;
+
 void opcontrol() {
 	pros::lcd::set_text(1, "Hello Driver!");
 	while (true) {
 		//drive
 		dt.arcadeDoubleStick(master);
 
-		//intake, prioritizes not scoring at all than scoring wrong
+		//bottom 2 intake rollers
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			//outtake topbottom
 			intakeLow.move_voltage(vconfig::maxVolt);
