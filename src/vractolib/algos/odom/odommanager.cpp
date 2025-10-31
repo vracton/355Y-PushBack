@@ -23,6 +23,13 @@ namespace vractolib {
 		for (auto &wheel: horizWheels) {
 			horiz.push_back({wheel.getDelta(),wheel.getOffset()});
 		}
+
+		/* TEMP CODE */
+		if (horiz.size() == 0) {
+			horiz.push_back({0.0,0.0});
+		}
+		/* END TEMP CODE */
+
 		for (auto &wheel: vertWheels) {
 			vert.push_back({wheel.getDelta(),wheel.getOffset()});
 		}
