@@ -18,7 +18,7 @@ namespace vractolib {
         */
         double getPos();
     public:
-        TrackingWheel(pros::Rotation &enc, double diam);
+        TrackingWheel(pros::Rotation &enc, double diam, double offset);
 
         double getDelta();
         double getOffset();

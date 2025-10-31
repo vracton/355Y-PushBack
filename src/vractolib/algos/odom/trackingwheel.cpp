@@ -1,8 +1,8 @@
 #include "vractolib/algos/odom/trackingwheel.h"
 
 namespace vractolib {
-    TrackingWheel::TrackingWheel(pros::Rotation &enc, double diam) 
-        : encoder(enc), diameter(diam), lastTotal(0) {}
+    TrackingWheel::TrackingWheel(pros::Rotation &enc, double diam, double offset) 
+        : encoder(enc), diameter(diam), offset(offset), lastTotal(0) {}
 
     double TrackingWheel::getPos() {
         return vunits::centiToRad(encoder.get_position());
