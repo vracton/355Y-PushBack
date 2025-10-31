@@ -1,9 +1,10 @@
 #include "main.h"
+#include <string>
 using namespace pros;
 
 //drive motors
 MotorGroup driveRight({-18, -17, -16}, v5::MotorGears::blue, v5::MotorUnits::degrees);
-MotorGroup driveleft({-20, -19, -15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
+MotorGroup driveLeft({-20, -19, -15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
 
 //intake motors
 Motor intakeHigh(1, v5::MotorGearset::green, v5::MotorUnits::degrees);
@@ -33,7 +34,7 @@ vractolib::IMU imu(imuSensor, 0.0);
 vractolib::OdomManager odom(horizWheels, vertWheels, imu);
 
 //drivetrain init
-vractolib::Drivetrain dt(driveleft, driveRight, latGains, turnGains, odom);
+vractolib::Drivetrain dt(driveLeft, driveRight, latGains, turnGains, odom);
 
 // vars
 bool isBlue = false;
@@ -53,10 +54,11 @@ void initialize() {
 	lcd::set_text(1, "Salutations!");
 
 	lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
-	ldd::set_text(3, "color sort subsytem not running")
+	lcd::set_text(3, "color sort subsytem not running");
 	lcd::register_btn1_cb(on_center_button);
 
 	dt.init();
+	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
 	// Task task{[] {
 	// 	while (true) {
 	// 		odom.update();
@@ -81,33 +83,33 @@ void opcontrol() {
 
 		//bottom 2 intake rollers
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			//outtake topbottom
+			//outtake tophigh
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeMid.move_voltage(vconfig::maxVolt);
-			if ((optical.get_hue() >= 120 && isBlue) || (optical.get_hue() <= 18 && !isBlue)) {
-				intakeHigh.move_voltage(-vconfig::maxVolt);
-			} else {
-				intakeHigh.move_voltage(vconfig::maxVolt);
-			}
+			spinDir = 1;
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			//outtake toplow
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeMid.move_voltage(vconfig::maxVolt);
-			if ((optical.get_hue() >= 120 && isBlue) || (optical.get_hue() <= 18 && !isBlue)) {
-				intakeHigh.move_voltage(vconfig::maxVolt);
-			} else {
-				intakeHigh.move_voltage(-vconfig::maxVolt);
-			}
+			spinDir = -1;
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) || master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
 			//outtake bottom
 			intakeLow.move_voltage(-vconfig::maxVolt);
 			intakeMid.move_voltage(-vconfig::maxVolt);
-			intakeHigh.move_voltage(0);
+			spinDir = 0;
 		} else {
 			intakeLow.move_voltage(0);
 			intakeMid.move_voltage(0);
-			intakeHigh.move_voltage(0);
+			spinDir = 0;
 		}
+
+		if ((optical.get_hue() >= 120 && isBlue) || (optical.get_hue() <= 18 && !isBlue)) {
+			intakeHigh.move_voltage(-vconfig::maxVolt * spinDir);
+		} else {
+			intakeHigh.move_voltage(vconfig::maxVolt * spinDir);
+		}
+	
+		lcd::set_text(3, std::to_string(static_cast<optical.get_hue()>));
 
 		delay(20);
 	}

@@ -15,6 +15,12 @@ namespace vractolib {
         odom.init();
     }
 
+    //setters
+    void Drivetrain::setBrakeMode(pros::motor_brake_mode_e brakeMode) {
+        leftMotors.set_brake_mode_all(brakeMode);
+        rightMotors.set_brake_mode_all(brakeMode);
+    }
+
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
         if (abs(turn) > vconfig::deadzone || abs(forward) > vconfig::deadzone) {
             leftMotors.move_voltage(mappedVolt(turn + forward));

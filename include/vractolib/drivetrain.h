@@ -24,6 +24,9 @@ namespace vractolib {
 
         void init();
 
+        //setters
+        void setBrakeMode(pros::motor_brake_mode_e brakeMode);
+
         //basic auton
         void turnTo(double angle, int timeout = 3000, int settleTime = 250, int maxVolt = vconfig::maxVolt);
 
