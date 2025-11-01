@@ -24,10 +24,10 @@ Optical optical(3);
 // Rotation horizEnc(6);
 Rotation vertEnc(7);
 // vractolib::TrackingWheel horiz(horizEnc, 3.25);
-vractolib::TrackingWheel vert(vertEnc, 3.25);
+vractolib::TrackingWheel vert(vertEnc, 2, 0.5);
 std::vector<vractolib::TrackingWheel> horizWheels = {};
 std::vector<vractolib::TrackingWheel> vertWheels = {vert};
-IMU imuSensor(10);
+IMU imuSensor(4);
 vractolib::IMU imu(imuSensor, 0.0);
 
 //odom init
@@ -59,19 +59,22 @@ void initialize() {
 
 	dt.init();
 	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
-	// Task task{[] {
-	// 	while (true) {
-	// 		odom.update();
-	// 		delay(vconfig::updateRate);
-	// 	}
-	// }};
+
+	Task task{[] {
+		while (true) {
+			odom.update();
+			delay(vconfig::updateRate);
+		}
+	}};
 }
 
 void disabled() {}
 
 void competition_initialize() {}
 
-void autonomous() {} //imagine having auton
+void autonomous() {
+	dt.move(5);
+}
 
 int spinDir = 0;
 
@@ -109,7 +112,8 @@ void opcontrol() {
 			intakeHigh.move_voltage(vconfig::maxVolt * spinDir);
 		}
 	
-		lcd::set_text(3, std::to_string(static_cast<optical.get_hue()>));
+		lcd::set_text(3, std::to_string(optical.get_hue()));
+		lcd::set_text(4, std::to_string(odom.getPose().x)+", "+std::to_string(odom.getPose().y)+", "+std::to_string(vunits::radToDeg(odom.getPose().theta)));
 
 		delay(20);
 	}
