@@ -2,7 +2,7 @@
 #include "pros/rtos.hpp"
 
 namespace vractolib {
-    Drivetrain::Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right, vractolib::PIDGains latGains, vractolib::PIDGains turnGains, vractolib::OdomManager odomManager) : leftMotors(left), rightMotors(right), latPID(latGains), turnPID(turnGains), odom(odomManager) { };
+    Drivetrain::Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right, vractolib::PIDGains latGains, vractolib::PIDGains turnGains, vractolib::OdomManager* odomManager) : leftMotors(left), rightMotors(right), latPID(latGains), turnPID(turnGains), odom(odomManager) { };
     
     int Drivetrain::linearVoltMap(int input) {
         // [-127, 127] -> [-12000, 12000]
@@ -12,7 +12,7 @@ namespace vractolib {
     void Drivetrain::init() {
         latPID.init();
         turnPID.init();
-        odom.init();
+        odom->init();
     }
 
     //setters

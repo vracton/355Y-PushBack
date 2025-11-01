@@ -13,14 +13,14 @@ namespace vractolib {
         pros::MotorGroup &leftMotors;
         pros::MotorGroup &rightMotors;
         vractolib::PID latPID, turnPID;
-        vractolib::OdomManager odom;
+        vractolib::OdomManager* odom;
 
         void arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt);
         void cheese_handle_input(int forward, int curve, std::function<int(int)> mappedVolt);
         static int linearVoltMap(int input);
 
         public:
-        Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right, vractolib::PIDGains latGains, vractolib::PIDGains turnGains, vractolib::OdomManager odomManager);
+        Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right, vractolib::PIDGains latGains, vractolib::PIDGains turnGains, vractolib::OdomManager* odomManager);
 
         void init();
 
