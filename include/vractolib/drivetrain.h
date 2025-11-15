@@ -22,7 +22,7 @@ namespace vractolib {
         public:
         Drivetrain(pros::MotorGroup &left, pros::MotorGroup &right, vractolib::PIDGains latGains, vractolib::PIDGains turnGains, vractolib::OdomManager* odomManager);
 
-        void init();
+        void init(vunits::Pose startPose = vunits::Pose{0.0, 0.0, 0.0});
 
         //setters
         void setBrakeMode(pros::motor_brake_mode_e brakeMode);

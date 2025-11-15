@@ -2,10 +2,11 @@
 #define CONFIG_H
 
 namespace vconfig {
-    const int maxPercent = 90;
-    const int maxVel = 1 * maxPercent;
+    const int maxPercent = 85;
+    const int maxVel = 1.2 * maxPercent;
     const int maxVolt = 120 * maxPercent;
-    const int deadzone = 10;
+    const int forwardDeadzone = 10;
+    const int turnDeadzone = 5;
     const int updateRate = 10; //ms
 }
 

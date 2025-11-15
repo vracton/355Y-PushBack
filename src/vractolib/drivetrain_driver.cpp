@@ -9,10 +9,10 @@ namespace vractolib {
         return std::min(input / 127.0 * 12000.0, 12000.0 / 100.0 * vconfig::maxVel);
     }
 
-    void Drivetrain::init() {
+    void Drivetrain::init(vunits::Pose startPose) {
         latPID.init();
         turnPID.init();
-        odom->init();
+        odom->init(startPose);
     }
 
     //setters
@@ -22,9 +22,9 @@ namespace vractolib {
     }
 
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
-        if (abs(turn) > vconfig::deadzone || abs(forward) > vconfig::deadzone) {
-            leftMotors.move_voltage(mappedVolt(turn + forward));
-            rightMotors.move_voltage(-mappedVolt(turn - forward));
+        if (abs(turn) > vconfig::turnDeadzone || abs(forward) > vconfig::forwardDeadzone) {
+            leftMotors.move_voltage(mappedVolt(0.5 * turn + forward));
+            rightMotors.move_voltage(-mappedVolt(0.5 * turn - forward));
         } else {
             leftMotors.move_voltage(0);
             rightMotors.move_voltage(0);
@@ -32,30 +32,30 @@ namespace vractolib {
     }
 
     void Drivetrain::arcade(pros::Controller controller, std::function<int(int)> mappedVolt) {
-        int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int leftX = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
+        int forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X) * (forward >= 0 ? -1 : 1);
 
-        arcade_handle_input(leftY, leftX, mappedVolt);
+        arcade_handle_input(forward, turn, mappedVolt);
     }
 
     void Drivetrain::arcadeDoubleStick(pros::Controller controller, std::function<int(int)> mappedVolt) {
-        int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int forward = -controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn = -controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-        arcade_handle_input(leftY, rightX, mappedVolt);
+        arcade_handle_input(forward, turn, mappedVolt);
     }
 
     void Drivetrain::tank(pros::Controller controller, std::function<int(int)> mappedVolt) {
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
-        if (abs(leftY) > vconfig::deadzone) {
+        if (abs(leftY) > vconfig::forwardDeadzone) {
             leftMotors.move_voltage(mappedVolt(leftY));
         } else {
             leftMotors.move_voltage(0);
         }
 
-        if (abs(rightY) > vconfig::deadzone) {
+        if (abs(rightY) > vconfig::forwardDeadzone) {
             rightMotors.move_voltage(mappedVolt(rightY));
         } else {
             rightMotors.move_voltage(0);

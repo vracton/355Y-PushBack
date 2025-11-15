@@ -1,4 +1,5 @@
 #include "vractolib/algos/odom/imu.h"
+#include <cmath>
 
 namespace vractolib {
     double IMU::getHeading() {
@@ -13,7 +14,19 @@ namespace vractolib {
 
     double IMU::getDelta() {
         double currentHeading = getHeading();
+
+        if (!std::isfinite(currentHeading)) { //nan check
+			currentHeading = 0.0;
+		}
+        if (!std::isfinite(lastHeading)) {
+            lastHeading = currentHeading;
+        }
+
         double delta = currentHeading - lastHeading;
+
+        if (delta >= vunits::PI) delta -= vunits::TAU;
+        if (delta < -vunits::PI) delta += vunits::TAU;
+
         lastHeading = currentHeading;
         return delta;
     }

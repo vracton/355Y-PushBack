@@ -1,31 +1,34 @@
 #include "vractolib/drivetrain.h"
+#include <string>
 
 namespace vractolib {
 	void Drivetrain::turnTo(double angle, int timeout, int settleTime, int maxVolt) {
-        const double absTarget = vunits::degToRad(angle);
+        const double normTarget = vunits::degToRad(angle);
 
-        // find nearest target angle
-        const double k = std::round((odom->getPose().theta - absTarget) / vunits::TAU);
-        const double normTarget = absTarget + vunits::TAU * k;
+        double cur = odom->getPose().theta;
+        int k = cur / vunits::TAU;
+        double absTarget = k * vunits::TAU + normTarget;
+        if (absTarget - cur > vunits::PI) k-=vunits::TAU;
 
-        const double aErr = vunits::degToRad(3.0); // acceptable error
+        const double aErr = vunits::degToRad(0.67); // acceptable error
         int settledTicks = 0;
         int elapsedTicks = 0;
 
-        turnPID.setTarget(normTarget);
+        turnPID.setTarget(absTarget);
 
         while (elapsedTicks * vconfig::updateRate < timeout && settledTicks * vconfig::updateRate < settleTime) {
             const double curHeading = odom->getPose().theta;
             const double pidOut = turnPID.update(curHeading);
-            
-            int volt = static_cast<int>(std::round(pidOut));
+            printf("%f\n", pidOut);
+            int volt = static_cast<int>(std::round(pidOut) * 250);
             if (volt > maxVolt) volt = maxVolt;
             if (volt < -maxVolt) volt = -maxVolt;
+            
+            rightMotors.move_velocity(volt);
+            leftMotors.move_velocity(-volt);
 
-            rightMotors.move_voltage(volt);
-            leftMotors.move_voltage(-volt);
-
-            const double err = std::fabs(normTarget - curHeading);
+            const double err = std::fabs(absTarget - curHeading);
+            printf("%f\n", err);
             settledTicks += (err <= aErr && std::abs(volt) <= maxVolt * 0.15);
             
             pros::delay(vconfig::updateRate);
@@ -37,11 +40,10 @@ namespace vractolib {
     }
 
     void Drivetrain::move(double distance, int timeout, int settleTime, int maxVolt) {
-        const double startX = odom->getPose().x;
-        const double startY = odom->getPose().y;
+        const vunits::Pose startPose = odom->getPose();
         const double targetDist = distance;
 
-        const double aErr = 0.15; // acceptable error
+        const double aErr = 0.2; // acceptable error
 
         int settledTicks = 0;
         int elapsedTicks = 0;
@@ -50,18 +52,20 @@ namespace vractolib {
 
         while (elapsedTicks * vconfig::updateRate < timeout && settledTicks * vconfig::updateRate < settleTime) {
             const vunits::Pose curPose = odom->getPose();
-            const double curDist = std::sqrt(std::pow(curPose.x - startX, 2) + std::pow(curPose.y - startY, 2));
-            printf("startX: %f, startY: %f, curX: %f, curY: %f\n", startX, startY, curPose.x, curPose.y);
+            double curDist = std::sqrt(std::pow(curPose.x - startPose.x, 2) + std::pow(curPose.y - startPose.y, 2));//(curPose.x - startPose.x) * std::cos(startPose.theta) + (curPose.y - startPose.y) * stdx::sin(startPose.theta); - need to change tot his eventually, but im getting fried by this
+            if (distance < 0) {
+                curDist = -curDist;
+            }
             const double pidOut = latPID.update(curDist);
 
-            // printf("pid out: %f\n", pidOut);
+            printf("pidout: %f, dist: %f\n", pidOut, curDist);
 
-            int volt = static_cast<int>(std::round(pidOut));
+            int volt = static_cast<int>(std::round(pidOut) * 100);
             if (volt > maxVolt) volt = maxVolt;
             if (volt < -maxVolt) volt = -maxVolt;
 
-            rightMotors.move_velocity(volt);
-            leftMotors.move_velocity(-volt);
+            rightMotors.move_voltage(volt);
+            leftMotors.move_voltage(volt);
 
             const double err = std::fabs(targetDist - curDist);
             settledTicks += (err <= aErr && std::abs(volt) <= maxVolt * 0.15);

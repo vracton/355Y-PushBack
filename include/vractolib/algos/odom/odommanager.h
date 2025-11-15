@@ -21,7 +21,7 @@ namespace vractolib {
 		public:
 		OdomManager(std::vector<TrackingWheel> hWheels, std::vector<TrackingWheel> vWheels, IMU imu);
 
-		void init();
+		void init(vunits::Pose startPose = vunits::Pose{0.0, 0.0, 0.0});
 		void reset();
 		void update();
 
