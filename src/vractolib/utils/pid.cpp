@@ -32,6 +32,10 @@ namespace vractolib {
         integral += error * dt;
 
         double deriv = (error - prevError) / dt;
+        if (prevError = 0) {
+            deriv = 0;
+        }
+        
         prevError = error;
 
         return gains.kP * error + gains.kI * integral + gains.kD * deriv;

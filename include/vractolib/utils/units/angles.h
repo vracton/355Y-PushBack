@@ -16,6 +16,13 @@ namespace vunits {
 	constexpr double centiToRad(double centis) {
 		return degToRad(centis / 100.0);
 	}
+
+	//clamp to [0, 2\pi)
+	inline double clampToUnitCircle(double angleRad) {
+		if (angleRad < 0) return angleRad + vunits::TAU;
+		if (angleRad >= vunits::TAU) return angleRad - vunits::TAU;
+		return angleRad;
+	}
 }
 
 #endif
