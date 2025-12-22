@@ -5,11 +5,16 @@ using namespace pros;
 //drive motors
 MotorGroup driveRight({-18, -17, -16}, v5::MotorGears::blue, v5::MotorUnits::degrees);
 MotorGroup driveLeft({20, 19, 15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
+MotorGroup driveLeft({20, 19, 15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
 
 //intake motors
 Motor intakeHigh(1, v5::MotorGearset::green, v5::MotorUnits::degrees);
 Motor intakeMid(-6, v5::MotorGearset::green, v5::MotorUnits::degrees);
 Motor intakeLow(21, v5::MotorGearset::blue, v5::MotorUnits::degrees);
+
+//pneumatics
+pros::adi::DigitalOut holdDescore('b');
+pros::adi::DigitalOut tongue('a');
 
 //pneumatics
 pros::adi::DigitalOut holdDescore('b');
@@ -23,6 +28,7 @@ vractolib::PIDGains latGains = {6.7, 0.0, 0.32};
 vractolib::PIDGains turnGains = {2.5, 0.5, 0.5}; //for 100.0 {2,0,0.215} is fine
 
 //sensors
+Optical optical(5);
 Optical optical(5);
 
 // Rotation horizEnc(6);
@@ -63,6 +69,8 @@ void initialize() {
 
 	dt.init(vunits::Pose{0.0, 0.0, vunits::degToRad(-4.0)});
 	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
+	holdDescore.set_value(false);
+	tongue.set_value(true);
 	holdDescore.set_value(false);
 	tongue.set_value(true);
 
@@ -125,6 +133,14 @@ void autonomous() {
 }
 
 int spinDir = 0;
+
+//[0]=tongue, [1]=holdDescore
+bool wasPressed[2] = {false, false};
+bool pistonStates[2] = {false, false};
+
+int curTick = 0;
+int nextDetectTick = 0;
+int holdDir = 0;
 
 //[0]=tongue, [1]=holdDescore
 bool wasPressed[2] = {false, false};
