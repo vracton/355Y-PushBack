@@ -13,7 +13,7 @@ namespace vractolib {
 
     void PID::reset() {
         integral = 0;
-        prevError = 0;
+        prevError = 6767; //temp value to indicate first run
         lastTime = pros::millis();
     }
 
@@ -32,7 +32,7 @@ namespace vractolib {
         integral += error * dt;
 
         double deriv = (error - prevError) / dt;
-        if (prevError = 0) {
+        if (prevError >= 500) {
             deriv = 0;
         }
         

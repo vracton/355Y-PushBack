@@ -23,8 +23,8 @@ namespace vractolib {
 
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
         if (abs(turn) > vconfig::turnDeadzone || abs(forward) > vconfig::forwardDeadzone) {
-            leftMotors.move_voltage(mappedVolt(0.5 * turn + forward));
-            rightMotors.move_voltage(-mappedVolt(0.5 * turn - forward));
+            leftMotors.move_voltage(mappedVolt(0.67 * turn + forward));
+            rightMotors.move_voltage(-mappedVolt(0.67 * turn - forward));
         } else {
             leftMotors.move_voltage(0);
             rightMotors.move_voltage(0);

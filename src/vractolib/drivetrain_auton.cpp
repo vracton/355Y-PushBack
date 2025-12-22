@@ -8,7 +8,7 @@ namespace vractolib {
         double cur = odom->getPose().theta;
         int k = cur / vunits::TAU;
         double absTarget = k * vunits::TAU + normTarget;
-        if (absTarget - cur > vunits::PI) k-=vunits::TAU;
+        if (absTarget - cur > vunits::PI) absTarget -= vunits::TAU;
 
         const double aErr = vunits::degToRad(0.67); // acceptable error
         int settledTicks = 0;
