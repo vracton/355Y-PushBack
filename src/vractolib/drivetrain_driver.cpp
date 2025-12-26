@@ -6,7 +6,7 @@ namespace vractolib {
     
     int Drivetrain::linearVoltMap(int input) {
         // [-127, 127] -> [-12000, 12000]
-        return std::min(input / 127.0 * 12000.0, 12000.0 / 100.0 * vconfig::maxVel);
+        return std::min(input / 127.0 * 12000.0, vconfig::maxVolt * 1.0);
     }
 
     void Drivetrain::init(vunits::Pose startPose) {
@@ -24,8 +24,8 @@ namespace vractolib {
 
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
         if (abs(turn) > vconfig::turnDeadzone || abs(forward) > vconfig::forwardDeadzone) {
-            leftMotors.move_voltage(mappedVolt(0.67 * turn + forward));
-            rightMotors.move_voltage(-mappedVolt(0.67 * turn - forward));
+            rightMotors.move_voltage(mappedVolt(0.67 * turn - forward));
+            leftMotors.move_voltage(-mappedVolt(0.67 * turn + forward));
         } else {
             leftMotors.move_voltage(0);
             rightMotors.move_voltage(0);

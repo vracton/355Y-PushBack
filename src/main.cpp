@@ -3,14 +3,12 @@
 using namespace pros;
 
 //drive motors
-MotorGroup driveRight({-18, -17, -16}, v5::MotorGears::blue, v5::MotorUnits::degrees);
-MotorGroup driveLeft({20, 19, 15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
-MotorGroup driveLeft({20, 19, 15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
+MotorGroup driveRight({9, 10, 8}, v5::MotorGears::blue, v5::MotorUnits::degrees);
+MotorGroup driveLeft({-11, -3, -15}, v5::MotorGears::blue, v5::MotorUnits::degrees);
 
 //intake motors
-Motor intakeHigh(1, v5::MotorGearset::green, v5::MotorUnits::degrees);
-Motor intakeMid(-6, v5::MotorGearset::green, v5::MotorUnits::degrees);
-Motor intakeLow(21, v5::MotorGearset::blue, v5::MotorUnits::degrees);
+Motor intakeLow(-12, v5::MotorGearset::blue, v5::MotorUnits::degrees);
+Motor intakeHigh(-6, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 
 //pneumatics
 pros::adi::DigitalOut holdDescore('b');
@@ -22,18 +20,18 @@ Controller master(E_CONTROLLER_MASTER);
 
 //pid gains
 vractolib::PIDGains latGains = {6.7, 0.0, 0.32};
-vractolib::PIDGains turnGains = {2.5, 0.5, 0.5}; //for 100.0 {2,0,0.215} is fine
+vractolib::PIDGains turnGains = {2.5, 0.5, 0.5};
 
 //sensors
 Optical optical(5);
 
-Rotation horizEnc(6);
+Rotation horizEnc(17);
 Rotation vertEnc(7);
 vractolib::TrackingWheel horiz(horizEnc, 2, 1.0);
 vractolib::TrackingWheel vert(vertEnc, 2, 0.5);
-std::vector<vractolib::TrackingWheel> horizWheels = {};
+std::vector<vractolib::TrackingWheel> horizWheels = {horiz};
 std::vector<vractolib::TrackingWheel> vertWheels = {vert};
-IMU imuSensor(4);
+IMU imuSensor(20);
 vractolib::IMU imu(imuSensor, 0.0);
 
 //odom init
@@ -63,7 +61,7 @@ void initialize() {
 	lcd::set_text(3, "color sort subsytem not running");
 	lcd::register_btn1_cb(on_center_button);
 
-	dt.init(vunits::Pose{0.0, 0.0, vunits::degToRad(-4.0)});
+	dt.init();
 	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
 	holdDescore.set_value(false);
 	tongue.set_value(true);
@@ -84,48 +82,48 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-	//move perp to goal
-	holdDescore.set_value(true);
-	intakeHigh.move_voltage(-vconfig::maxVolt*0.5);
-	intakeLow.move_voltage(vconfig::maxVolt);
-	intakeMid.move_voltage(vconfig::maxVolt);
+	// //move perp to goal
+	// holdDescore.set_value(true);
+	// intakeHigh.move_voltage(-vconfig::maxVolt*0.5);
+	// intakeLow.move_voltage(vconfig::maxVolt);
+	// intakeMid.move_voltage(vconfig::maxVolt);
 
-	dt.move(-30, 1500, 250, 12000*0.3);//-38.274
-	delay(250);
-	intakeMid.move_voltage(0);
-	dt.turnTo(-128, 1000, 250, 600*0.3);
-	delay(1000);
-	dt.move(17, 1000, 250, 12000*0.2);
-	intakeLow.move_voltage(12000);
-	intakeMid.move_voltage(12000);
-	intakeHigh.move_voltage(12000);
-	delay(2000);
+	// dt.move(-30, 1500, 250, 12000*0.3);//-38.274
+	// delay(250);
+	// intakeMid.move_voltage(0);
+	// dt.turnTo(-128, 1000, 250, 600*0.3);
+	// delay(1000);
+	// dt.move(17, 1000, 250, 12000*0.2);
+	// intakeLow.move_voltage(12000);
+	// intakeMid.move_voltage(12000);
+	// intakeHigh.move_voltage(12000);
+	// delay(2000);
+	// // intakeLow.move_voltage(0);
+	// intakeMid.move_voltage(0);
+	// //go back to long goal
+	// dt.move(-52, 1500, 250, 12000*0.6);//50.4589031905
+	// delay(250);
+	// dt.turnTo(-180, 750, 250, 600*0.3);
+	// tongue.set_value(false);
+	// delay(1000);
+	// intakeLow.move_voltage(12000);//vconfig::maxVolt*0.7);
+	// intakeMid.move_voltage(12000);//vconfig::maxVolt*0.7);
+	// dt.move(-13.5,250, 12000*0.6);//-33.189
+
+	// //at mathcload
+	// delay(1500);
 	// intakeLow.move_voltage(0);
-	intakeMid.move_voltage(0);
-	//go back to long goal
-	dt.move(-52, 1500, 250, 12000*0.6);//50.4589031905
-	delay(250);
-	dt.turnTo(-180, 750, 250, 600*0.3);
-	tongue.set_value(false);
-	delay(1000);
-	intakeLow.move_voltage(12000);//vconfig::maxVolt*0.7);
-	intakeMid.move_voltage(12000);//vconfig::maxVolt*0.7);
-	dt.move(-13.5,250, 12000*0.6);//-33.189
-
-	//at mathcload
-	delay(1500);
-	intakeLow.move_voltage(0);
-	intakeMid.move_voltage(0);
-	dt.move(10,500,350, 12000*0.4);
-	dt.turnTo(-180, 250, 250, 600*0.3);
-	dt.move(25,1500,350, 12000*0.4);
-	holdDescore.set_value(false);
-	intakeLow.move_voltage(12000);
-	intakeMid.move_voltage(12000);
-	intakeHigh.move_voltage(-12000);
-	delay(2000);
-	intakeMid.move_voltage(0);
-	intakeHigh.move_voltage(0);
+	// intakeMid.move_voltage(0);
+	// dt.move(10,500,350, 12000*0.4);
+	// dt.turnTo(-180, 250, 250, 600*0.3);
+	// dt.move(25,1500,350, 12000*0.4);
+	// holdDescore.set_value(false);
+	// intakeLow.move_voltage(12000);
+	// intakeMid.move_voltage(12000);
+	// intakeHigh.move_voltage(-12000);
+	// delay(2000);
+	// intakeMid.move_voltage(0);
+	// intakeHigh.move_voltage(0);
 }
 
 int spinDir = 0;
@@ -138,60 +136,32 @@ int curTick = 0;
 int nextDetectTick = 0;
 int holdDir = 0;
 
-//[0]=tongue, [1]=holdDescore
-bool wasPressed[2] = {false, false};
-bool pistonStates[2] = {false, false};
-
-int curTick = 0;
-int nextDetectTick = 0;
-int holdDir = 0;
-
 void opcontrol() {
-	// delay(3500);
-	// odom.setHeading(7.0);
-	// delay(1000);
-	// // dt.move(10);
-	// //TODO:
-	// //fix drive being reverse
-	// //fix it so both dts in same dir equals forward
-// dt.move(-2, 1500, 250, 12000*0.3);
-	// //TODO:
-	// //fix error with going to 0/-360 :check:
-	// //fix deg being negative :check
-	// //fix stopping conditions not being achieved even though close enough (not adjusting, deriv too high)
-	// //turning cw is much worse than ccw??? :check:
-	// //fix not going shortest direction
-	
-	// autonomous();
-
 	//move optical system to always running loop in init
+
+	// pros::delay(3000);
+	// dt.turnTo(90, 3000, 250, 600*0.3);
 
 	while (true) {
 		//drive
 		dt.arcadeDoubleStick(master);
 
 		//bottom 2 intake rollers
-		lcd::set_text(2, std::to_string(static_cast<int>(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1))));
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			lcd::set_text(3, "outtaking high");
-			//outtake tophigh
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) && master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intakeLow.move_voltage(vconfig::maxVolt);
-			intakeMid.move_voltage(vconfig::maxVolt);
-			spinDir = 1;
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			//outtake toplow
 			intakeLow.move_voltage(vconfig::maxVolt);
-			intakeMid.move_voltage(vconfig::maxVolt);
-			spinDir = -1;
-		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+			intakeHigh.move_voltage(-vconfig::maxVolt);
+		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			//outtake bottom
+			intakeLow.move_voltage(vconfig::maxVolt);
+			intakeHigh.move_voltage(vconfig::maxVolt);
+		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
 			intakeLow.move_voltage(-vconfig::maxVolt);
-			intakeMid.move_voltage(-vconfig::maxVolt);
-			spinDir = 0;
 		} else {
 			intakeLow.move_voltage(0);
-			intakeMid.move_voltage(0);
-			spinDir = 0;
+			intakeHigh.move_voltage(0);
 		}
 
 		// if (curTick == nextDetectTick) {

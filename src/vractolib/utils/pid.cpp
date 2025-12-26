@@ -22,22 +22,21 @@ namespace vractolib {
         PID::reset();
     }
 
-    double PID::update(double at) {
+    double PID::update(double err) {
         const uint32_t curTime = pros::millis();
-        const double error = target - at;
 
         double dt = (curTime - lastTime) / 1000.0;
         lastTime = curTime;
 
-        integral += error * dt;
+        integral += err * dt;
 
-        double deriv = (error - prevError) / dt;
+        double deriv = (err - prevError) / dt;
         if (prevError >= 500) {
             deriv = 0;
         }
         
-        prevError = error;
+        prevError = err;
 
-        return gains.kP * error + gains.kI * integral + gains.kD * deriv;
+        return gains.kP * err + gains.kI * integral + gains.kD * deriv;
     }
 }

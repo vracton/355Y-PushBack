@@ -1,4 +1,6 @@
 #include "vractolib/algos/odom/odommanager.h"
+#include "vractolib/utils/units/angles.h"
+#include <cmath>
 #include <string>
 
 namespace vractolib {
@@ -17,7 +19,7 @@ namespace vractolib {
 			wheel.reset();
 		}
 		imu.reset();
-		pose = vunits::Pose(0.0,0.0,vunits::degToRad(4.0));
+		pose = vunits::Pose(0.0, 0.0, 0.0);
 	}
 
 	void OdomManager::update() {
@@ -26,12 +28,16 @@ namespace vractolib {
 		for (auto &wheel: horizWheels) {
 			horiz.push_back({wheel.getDelta(),wheel.getOffset()});
 		}
-		if (horiz.size() == 0) {
-			horiz.push_back({0.0,0.0});
-		}
 		
 		for (auto &wheel: vertWheels) {
 			vert.push_back({wheel.getDelta(),wheel.getOffset()});
+		}
+
+		if (horiz.size() == 0) {
+			horiz.push_back({0.0,0.0});
+		}
+		if (vert.size() == 0) {
+			vert.push_back({0.0,0.0});
 		}
 		
 		double dTheta = imu.getDelta();
@@ -42,15 +48,12 @@ namespace vractolib {
 
 		vunits::Pose local = vunits::Pose(horiz[0].first, vert[0].first, 0.0);
 
-		if (dTheta > 0.05) { // 0.05 is arbitrary for now
+		if (std::fabs(dTheta) > 0.015) {
 			local += vunits::Pose(horiz[0].first/dTheta, vert[0].first/dTheta, 0.0);
 			local *= 2.0 * std::sin(dTheta/2);
 		}
 		
-		pose += local.rotatedBy(pose.theta+dTheta/2);
-		vunits::Pose change = local.rotatedBy(pose.theta+dTheta/2);
-		
-		pose.theta += dTheta;
-		// pose.theta = vunits::clampToUnitCircle(pose.theta);
+		pose += local.rotatedBy(pose.theta + dTheta/2);
+		pose.theta = vunits::wrapToSignedRadians(pose.theta + dTheta);
 	}
 }

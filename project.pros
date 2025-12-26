@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "355yDrive",
+    "project_name": "355y auton",
     "target": "v5",
     "templates": {
       "kernel": {

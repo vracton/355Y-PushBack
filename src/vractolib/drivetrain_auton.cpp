@@ -1,37 +1,31 @@
 #include "vractolib/drivetrain.h"
-#include <string>
+#include <cmath>
 #include <string>
 
 namespace vractolib {
-	void Drivetrain::turnTo(double angle, int timeout, int settleTime, int maxVolt) {
-        const double normTarget = vunits::degToRad(angle);
-
-        double cur = odom->getPose().theta;
-        int k = cur / vunits::TAU;
-        double absTarget = k * vunits::TAU + normTarget;
-        if (absTarget - cur > vunits::PI) absTarget -= vunits::TAU;
+    void Drivetrain::turnTo(double angle, int timeout, int settleTime, int maxVolt) {
+        const double targetHeading = vunits::wrapToSignedRadians(vunits::degToRad(angle));
 
         const double aErr = vunits::degToRad(0.67); // acceptable error
         int settledTicks = 0;
         int elapsedTicks = 0;
 
-        turnPID.setTarget(absTarget);
+        turnPID.setTarget(targetHeading);
 
         while (elapsedTicks * vconfig::updateRate < timeout && settledTicks * vconfig::updateRate < settleTime) {
             const double curHeading = odom->getPose().theta;
-            const double pidOut = turnPID.update(curHeading);
-            printf("%f\n", pidOut);
+            const double err = vunits::angleDiffRadians(targetHeading, curHeading);
+
+            const double pidOut = turnPID.update(err);
             int volt = static_cast<int>(std::round(pidOut) * 250);
             if (volt > maxVolt) volt = maxVolt;
             if (volt < -maxVolt) volt = -maxVolt;
-            
-            rightMotors.move_velocity(volt);
-            leftMotors.move_velocity(-volt);
+			
+            rightMotors.move_voltage(-volt);
+            leftMotors.move_voltage(volt);
 
-            const double err = std::fabs(absTarget - curHeading);
-            printf("%f\n", err);
-            settledTicks += (err <= aErr && std::abs(volt) <= maxVolt * 0.15);
-            
+            settledTicks += (std::fabs(err) <= aErr && std::abs(volt) <= maxVolt * 0.15);
+			
             pros::delay(vconfig::updateRate);
             elapsedTicks += 1;
         }
