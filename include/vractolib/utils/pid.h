@@ -18,7 +18,7 @@ namespace vractolib {
             uint32_t lastTime = 0;
             double integral = 0;
             double prevError = 0;
-            double target = 0;
+            bool starting = true;
 
         public:
             PID(double kP = 0, double kI = 0, double kD = 0);
@@ -27,9 +27,7 @@ namespace vractolib {
             void reset();
             void init();
 
-            void setTarget(double newTarget);
-
-            double update(double at);
+            double update(double err);
     };
 }
 

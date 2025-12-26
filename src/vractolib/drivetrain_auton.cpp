@@ -6,11 +6,9 @@ namespace vractolib {
     void Drivetrain::turnTo(double angle, int timeout, int settleTime, int maxVolt) {
         const double targetHeading = vunits::wrapToSignedRadians(vunits::degToRad(angle));
 
-        const double aErr = vunits::degToRad(0.67); // acceptable error
+        const double aErr = vunits::degToRad(0.5); // acceptable error
         int settledTicks = 0;
         int elapsedTicks = 0;
-
-        turnPID.setTarget(targetHeading);
 
         while (elapsedTicks * vconfig::updateRate < timeout && settledTicks * vconfig::updateRate < settleTime) {
             const double curHeading = odom->getPose().theta;

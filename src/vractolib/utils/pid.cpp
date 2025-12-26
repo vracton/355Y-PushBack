@@ -2,10 +2,10 @@
 
 namespace vractolib {
     PID::PID(double kP, double kI, double kD) 
-        : gains{kP, kI, kD}, integral(0), prevError(0), target(0) {};
+        : gains{kP, kI, kD}, integral(0), prevError(0), starting(true) {};
     
     PID::PID(PIDGains gains) 
-        : gains(gains), integral(0), prevError(0), target(0) {};
+        : gains(gains), integral(0), prevError(0), starting(true) {};
 
     void PID::init() {
         PID::reset();
@@ -13,13 +13,9 @@ namespace vractolib {
 
     void PID::reset() {
         integral = 0;
-        prevError = 6767; //temp value to indicate first run
+        prevError = 0;
+        starting = true;
         lastTime = pros::millis();
-    }
-
-    void PID::setTarget(double newTarget) {
-        target = newTarget;
-        PID::reset();
     }
 
     double PID::update(double err) {
@@ -28,14 +24,19 @@ namespace vractolib {
         double dt = (curTime - lastTime) / 1000.0;
         lastTime = curTime;
 
+        if (dt <= 0) {
+            dt = 1e-6;
+        }
+
         integral += err * dt;
 
-        double deriv = (err - prevError) / dt;
-        if (prevError >= 500) {
-            deriv = 0;
+        double deriv = 0.0;
+        if (!starting) { // avoid large spike on first cycle
+            deriv = (err - prevError) / dt;
         }
-        
+
         prevError = err;
+        starting = false;
 
         return gains.kP * err + gains.kI * integral + gains.kD * deriv;
     }
