@@ -10,7 +10,6 @@ namespace vractolib {
     }
 
     void Drivetrain::init(vunits::Pose startPose) {
-    void Drivetrain::init(vunits::Pose startPose) {
         latPID.init();
         turnPID.init();
         odom->init(startPose);
@@ -36,20 +35,14 @@ namespace vractolib {
     void Drivetrain::arcade(pros::Controller controller, std::function<int(int)> mappedVolt) {
         int forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int turn = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X) * (forward >= 0 ? -1 : 1);
-        int forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int turn = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X) * (forward >= 0 ? -1 : 1);
 
-        arcade_handle_input(forward, turn, mappedVolt);
         arcade_handle_input(forward, turn, mappedVolt);
     }
 
     void Drivetrain::arcadeDoubleStick(pros::Controller controller, std::function<int(int)> mappedVolt) {
         int forward = -controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int turn = -controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        int forward = -controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int turn = -controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-        arcade_handle_input(forward, turn, mappedVolt);
         arcade_handle_input(forward, turn, mappedVolt);
     }
 
@@ -58,13 +51,11 @@ namespace vractolib {
         int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
         if (abs(leftY) > vconfig::forwardDeadzone) {
-        if (abs(leftY) > vconfig::forwardDeadzone) {
             leftMotors.move_voltage(mappedVolt(leftY));
         } else {
             leftMotors.move_voltage(0);
         }
 
-        if (abs(rightY) > vconfig::forwardDeadzone) {
         if (abs(rightY) > vconfig::forwardDeadzone) {
             rightMotors.move_voltage(mappedVolt(rightY));
         } else {

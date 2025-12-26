@@ -16,9 +16,6 @@ Motor intakeLow(21, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 pros::adi::DigitalOut holdDescore('b');
 pros::adi::DigitalOut tongue('a');
 
-//pneumatics
-pros::adi::DigitalOut holdDescore('b');
-pros::adi::DigitalOut tongue('a');
 
 //controller
 Controller master(E_CONTROLLER_MASTER);
@@ -29,11 +26,10 @@ vractolib::PIDGains turnGains = {2.5, 0.5, 0.5}; //for 100.0 {2,0,0.215} is fine
 
 //sensors
 Optical optical(5);
-Optical optical(5);
 
-// Rotation horizEnc(6);
+Rotation horizEnc(6);
 Rotation vertEnc(7);
-// vractolib::TrackingWheel horiz(horizEnc, 3.25);
+vractolib::TrackingWheel horiz(horizEnc, 2, 1.0);
 vractolib::TrackingWheel vert(vertEnc, 2, 0.5);
 std::vector<vractolib::TrackingWheel> horizWheels = {};
 std::vector<vractolib::TrackingWheel> vertWheels = {vert};
@@ -198,45 +194,45 @@ void opcontrol() {
 			spinDir = 0;
 		}
 
-		if (curTick == nextDetectTick) {
-			if (isBlue) {
-				if (true){//optical.get_hue() >= 40) {
-					lcd::set_text(3, std::to_string(optical.get_hue())+" good");
-					intakeHigh.move_voltage(-vconfig::maxVolt * spinDir);
-					holdDir = -vconfig::maxVolt * spinDir;
-					nextDetectTick+=5;
-				} else if (optical.get_hue() <= 20) {
-					lcd::set_text(3, std::to_string(optical.get_hue())+" wrong");
-					intakeHigh.move_voltage(vconfig::maxVolt * spinDir);
-					holdDir = vconfig::maxVolt * spinDir;
-					nextDetectTick+=15;
-				} else {
-					lcd::set_text(3, std::to_string(optical.get_hue())+" waiting");
-					intakeHigh.move_voltage(0);
-					nextDetectTick++;
-				}
-			} else {
-				if (true) {//optical.get_hue() <= 20) {
-					lcd::set_text(3, std::to_string(optical.get_hue())+" good");
-					intakeHigh.move_voltage(vconfig::maxVolt * spinDir);
-					holdDir = vconfig::maxVolt * spinDir;
-					nextDetectTick+=15;
-				} else if (optical.get_hue() >= 40) {
-					lcd::set_text(3, std::to_string(optical.get_hue())+" wrong");
-					intakeHigh.move_voltage(-vconfig::maxVolt * spinDir);
-					holdDir = -vconfig::maxVolt * spinDir;
-					nextDetectTick+=15;
-				} else {
-					lcd::set_text(3, std::to_string(optical.get_hue())+" waiting");
-					intakeHigh.move_voltage(0);
-					nextDetectTick++;
-				}
-			}
-		} else {
-			lcd::set_text(3, std::to_string(optical.get_hue())+" holding");
-			intakeHigh.move_voltage(holdDir);
-			// intakeMid.move_voltage(0);
-		}
+		// if (curTick == nextDetectTick) {
+		// 	if (isBlue) {
+		// 		if (true){//optical.get_hue() >= 40) {
+		// 			lcd::set_text(3, std::to_string(optical.get_hue())+" good");
+		// 			intakeHigh.move_voltage(-vconfig::maxVolt * spinDir);
+		// 			holdDir = -vconfig::maxVolt * spinDir;
+		// 			nextDetectTick+=5;
+		// 		} else if (optical.get_hue() <= 20) {
+		// 			lcd::set_text(3, std::to_string(optical.get_hue())+" wrong");
+		// 			intakeHigh.move_voltage(vconfig::maxVolt * spinDir);
+		// 			holdDir = vconfig::maxVolt * spinDir;
+		// 			nextDetectTick+=15;
+		// 		} else {
+		// 			lcd::set_text(3, std::to_string(optical.get_hue())+" waiting");
+		// 			intakeHigh.move_voltage(0);
+		// 			nextDetectTick++;
+		// 		}
+		// 	} else {
+		// 		if (true) {//optical.get_hue() <= 20) {
+		// 			lcd::set_text(3, std::to_string(optical.get_hue())+" good");
+		// 			intakeHigh.move_voltage(vconfig::maxVolt * spinDir);
+		// 			holdDir = vconfig::maxVolt * spinDir;
+		// 			nextDetectTick+=15;
+		// 		} else if (optical.get_hue() >= 40) {
+		// 			lcd::set_text(3, std::to_string(optical.get_hue())+" wrong");
+		// 			intakeHigh.move_voltage(-vconfig::maxVolt * spinDir);
+		// 			holdDir = -vconfig::maxVolt * spinDir;
+		// 			nextDetectTick+=15;
+		// 		} else {
+		// 			lcd::set_text(3, std::to_string(optical.get_hue())+" waiting");
+		// 			intakeHigh.move_voltage(0);
+		// 			nextDetectTick++;
+		// 		}
+		// 	}
+		// } else {
+		// 	lcd::set_text(3, std::to_string(optical.get_hue())+" holding");
+		// 	intakeHigh.move_voltage(holdDir);
+		// 	// intakeMid.move_voltage(0);
+		// }
 	
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
 			if (!wasPressed[0]) {
