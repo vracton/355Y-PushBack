@@ -19,8 +19,8 @@ pros::adi::DigitalOut tongue('a');
 Controller master(E_CONTROLLER_MASTER);
 
 //pid gains
-vractolib::PIDGains latGains = {6.7, 0.0, 0.32};
-vractolib::PIDGains turnGains = {2.5, 0.5, 0.5};
+vractolib::PIDGains latGains = {6.0, 0.0, 1.0};
+vractolib::PIDGains turnGains = {60.0, 0.0, 9.7};
 
 //sensors
 Optical optical(5);
@@ -139,8 +139,8 @@ int holdDir = 0;
 void opcontrol() {
 	//move optical system to always running loop in init
 
-	// pros::delay(3000);
-	// dt.turnTo(90, 3000, 250, 600*0.3);
+	pros::delay(3000);
+	dt.turnTo(-30);
 
 	while (true) {
 		//drive
