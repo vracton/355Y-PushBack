@@ -12,6 +12,7 @@ namespace vractolib {
         return vunits::wrapToSignedRadians(vunits::degToRad(heading) - offset);
     }
 
+    //returns change in heading since last call in radians
     double IMU::getDelta() {
         double currentHeading = getHeading();
 

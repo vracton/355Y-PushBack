@@ -139,8 +139,8 @@ int holdDir = 0;
 void opcontrol() {
 	//move optical system to always running loop in init
 
-	pros::delay(3000);
-	dt.turnTo(-30);
+	// pros::delay(3000);
+	// dt.turnTo(-30);
 
 	while (true) {
 		//drive

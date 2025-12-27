@@ -13,7 +13,6 @@ namespace vractolib {
         latPID.init();
         turnPID.init();
         odom->init(startPose);
-        odom->init(startPose);
     }
 
     //setters

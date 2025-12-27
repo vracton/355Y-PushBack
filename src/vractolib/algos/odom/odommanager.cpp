@@ -48,12 +48,13 @@ namespace vractolib {
 
 		vunits::Pose local = vunits::Pose(horiz[0].first, vert[0].first, 0.0);
 
-		if (std::fabs(dTheta) > 0.015) {
-			local += vunits::Pose(horiz[0].first/dTheta, vert[0].first/dTheta, 0.0);
-			local *= 2.0 * std::sin(dTheta/2);
+		if (std::fabs(dTheta) > 1e-6) {
+			local /= dTheta;
+			local -= vunits::Pose(horiz[0].second, vert[0].second, 0.0);
+			local *= 2.0 * std::sin(dTheta / 2);
 		}
 		
-		pose += local.rotatedBy(pose.theta + dTheta/2);
+		pose += local.rotatedBy(pose.theta + dTheta / 2);
 		pose.theta = vunits::wrapToSignedRadians(pose.theta + dTheta);
 	}
 }

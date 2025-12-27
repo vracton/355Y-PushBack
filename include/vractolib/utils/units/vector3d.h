@@ -47,10 +47,24 @@ namespace vunits {
                 return *this;
             }
 
+            Vector3D& operator-=(const Vector3D<T> &v1) {
+                x -= v1.x;
+                y -= v1.y;
+                z -= v1.z;
+                return *this;
+            }
+
             Vector3D& operator*=(const T &s) {
                 x *= s;
                 y *= s;
                 z *= s;
+                return *this;
+            }
+
+            Vector3D& operator/=(const T &s) {
+                x /= s;
+                y /= s;
+                z /= s;
                 return *this;
             }
     };
