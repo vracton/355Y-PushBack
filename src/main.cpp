@@ -20,7 +20,7 @@ Controller master(E_CONTROLLER_MASTER);
 
 //pid gains
 vractolib::PIDGains latGains = {6.0, 0.0, 1.0};
-vractolib::PIDGains turnGains = {60.0, 0.0, 9.7};
+vractolib::PIDGains turnGains = {58.0, 0.0, 12.67};
 
 //sensors
 Optical optical(5);
@@ -139,8 +139,62 @@ int holdDir = 0;
 void opcontrol() {
 	//move optical system to always running loop in init
 
+	pros::delay(3000);
+
+	//solo awp
+	// dt.move(29.75);
+	// dt.turnTo(-90); //90 for right
+	// dt.move(8.5);
+	// intakeLow.move_voltage(vconfig::maxVolt);
+	// pros::delay(2000);
+
+	// //outtake long
+	// dt.move(-29.5);
+	// intakeLow.move_voltage(vconfig::maxVolt*0.7);
+	// intakeHigh.move_voltage(vconfig::maxVolt);
+	// pros::delay(1500);
+	// intakeHigh.move_voltage(0);
+	// intakeLow.move_voltage(0);
+	// dt.move(5);
+	// dt.turnTo(142.5); //-60.0 for right
+	// //turn to mid
+	// intakeLow.move_voltage(vconfig::maxVolt);
+	// dt.move(23, 4000, 150, 4500);
+	// dt.turnTo(-180);
+	// dt.move(30);
+
+	//qual autons
+	// dt.move(29.5);
+	// dt.turnTo(-90); //90 for right
+	// dt.move(8.5);
+	// intakeLow.move_voltage(vconfig::maxVolt);
+	// pros::delay(2000);
+
+	// //outtake long
+	// dt.move(-29.5);
+	// intakeLow.move_voltage(vconfig::maxVolt*0.7);
+	// intakeHigh.move_voltage(vconfig::maxVolt);
+	// pros::delay(1500);
+	// intakeHigh.move_voltage(0);
+	// intakeLow.move_voltage(0);
+	// dt.move(20);
+	// dt.turnTo(135); //-135 for right
+
+	// // //mid low - right
+	// // intakeLow.move_voltage(vconfig::maxVolt);
+	// // dt.move(57, 4000, 150, 4500);
+	// // intakeLow.move_voltage(-vconfig::maxVolt*0.5);
+	// // pros::delay(3000);
+	// // intakeLow.move_voltage(0);
+
+	// //mid low - left
+	// intakeLow.move_voltage(vconfig::maxVolt);
+	// dt.move(37, 4000, 150, 4500);
+	// pros::delay(500);
+	// dt.turnTo(-45);
+	// dt.move(-20);
 	// pros::delay(3000);
-	// dt.turnTo(-30);
+	// intakeLow.move_voltage(0);
 
 	while (true) {
 		//drive
