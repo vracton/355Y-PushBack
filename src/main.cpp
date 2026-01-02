@@ -11,8 +11,9 @@ Motor intakeLow(-12, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 Motor intakeHigh(-6, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 
 //pneumatics
-pros::adi::DigitalOut holdDescore('b');
-pros::adi::DigitalOut tongue('a');
+adi::DigitalOut middle('a');
+adi::DigitalOut arm('b');
+adi::DigitalOut tongue('c');
 
 
 //controller
@@ -40,8 +41,10 @@ vractolib::OdomManager odom(horizWheels, vertWheels, imu);
 //drivetrain init
 vractolib::Drivetrain dt(driveLeft, driveRight, latGains, turnGains, &odom);
 
-// vars
-bool isBlue = false;
+// auton manager
+vractolib::AutonManager autonManager;
+
+bool isBlue = true;
 
 void on_center_button() {
 	static bool pressed = false;
@@ -63,10 +66,13 @@ void initialize() {
 
 	dt.init();
 	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
-	holdDescore.set_value(false);
-	tongue.set_value(true);
-	holdDescore.set_value(false);
-	tongue.set_value(true);
+	tongue.set_value(false);
+	middle.set_value(true);
+	arm.set_value(true);
+
+	intakeHigh.set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD);
+
+	autonManager.selectAuton(vractolib::AutonType::QUALS);
 
 	Task task{[] {
 		while (true) {
@@ -82,119 +88,138 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-	// //move perp to goal
-	// holdDescore.set_value(true);
-	// intakeHigh.move_voltage(-vconfig::maxVolt*0.5);
-	// intakeLow.move_voltage(vconfig::maxVolt);
-	// intakeMid.move_voltage(vconfig::maxVolt);
+	switch (autonManager.getAutonType()) {
+		case vractolib::AutonType::NONE:
+			return;
+		case vractolib::AutonType::QUALS:
+			//qual autons
+			dt.move(29.5);
+			tongue.set_value(true);
+			dt.turnTo(90 * autonManager.sign());
+			dt.move(8.5);
+			intakeLow.move_voltage(vconfig::maxVolt);
+			pros::delay(2000);
 
-	// dt.move(-30, 1500, 250, 12000*0.3);//-38.274
-	// delay(250);
-	// intakeMid.move_voltage(0);
-	// dt.turnTo(-128, 1000, 250, 600*0.3);
-	// delay(1000);
-	// dt.move(17, 1000, 250, 12000*0.2);
-	// intakeLow.move_voltage(12000);
-	// intakeMid.move_voltage(12000);
-	// intakeHigh.move_voltage(12000);
-	// delay(2000);
-	// // intakeLow.move_voltage(0);
-	// intakeMid.move_voltage(0);
-	// //go back to long goal
-	// dt.move(-52, 1500, 250, 12000*0.6);//50.4589031905
-	// delay(250);
-	// dt.turnTo(-180, 750, 250, 600*0.3);
-	// tongue.set_value(false);
-	// delay(1000);
-	// intakeLow.move_voltage(12000);//vconfig::maxVolt*0.7);
-	// intakeMid.move_voltage(12000);//vconfig::maxVolt*0.7);
-	// dt.move(-13.5,250, 12000*0.6);//-33.189
+			//outtake long
+			dt.move(-29.5);
+			tongue.set_value(false);
+			intakeLow.move_voltage(vconfig::maxVolt*0.7);
+			intakeHigh.move_voltage(vconfig::maxVolt);
+			pros::delay(1500);
+			intakeHigh.move_voltage(0);
+			intakeLow.move_voltage(0);
+			dt.move(20);
+			dt.turnTo(-135 * autonManager.sign());
 
-	// //at mathcload
-	// delay(1500);
-	// intakeLow.move_voltage(0);
-	// intakeMid.move_voltage(0);
-	// dt.move(10,500,350, 12000*0.4);
-	// dt.turnTo(-180, 250, 250, 600*0.3);
-	// dt.move(25,1500,350, 12000*0.4);
-	// holdDescore.set_value(false);
-	// intakeLow.move_voltage(12000);
-	// intakeMid.move_voltage(12000);
-	// intakeHigh.move_voltage(-12000);
-	// delay(2000);
-	// intakeMid.move_voltage(0);
-	// intakeHigh.move_voltage(0);
+			//mid low
+			if (autonManager.getSide() == vractolib::Side::LEFT) {
+				intakeLow.move_voltage(vconfig::maxVolt);
+				dt.move(37, 4000, 150, 4500);
+				pros::delay(500);
+				dt.turnTo(-45);
+				middle.set_value(false);
+				dt.move(-20);
+				pros::delay(3000);
+				intakeLow.move_voltage(0);
+			} else {
+				intakeLow.move_voltage(vconfig::maxVolt);
+				dt.move(57, 4000, 150, 4500);
+				intakeLow.move_voltage(-vconfig::maxVolt*0.5);
+				pros::delay(3000);
+				intakeLow.move_voltage(0);
+			}
+			
+			break;
+		case vractolib::AutonType::SAWP:
+			// solo awp - ONLY LEFT
+			dt.move(30.75);
+			dt.turnTo(-90);
+			dt.move(8.5, 500);
+			intakeLow.move_voltage(vconfig::maxVolt);
+			pros::delay(500);
+
+			//outtake long
+			dt.move(-32, 1000);
+			intakeLow.move_voltage(vconfig::maxVolt*0.7);
+			intakeHigh.move_voltage(vconfig::maxVolt);
+			pros::delay(500);
+			intakeHigh.move_voltage(0);
+			intakeLow.move_voltage(0);
+			dt.move(7, 500);
+			dt.turnTo(142.5, 750);
+
+			//turn to mid
+			intakeLow.move_voltage(vconfig::maxVolt);
+			dt.move(23, 1000, 150, 7000);
+			dt.turnTo(-180, 750);
+			dt.move(52, 1500, 150, 7000);
+			intakeLow.move_voltage(0);
+			dt.turnTo(45);
+			dt.move(20, 750, 150, 7000);
+			intakeLow.move_voltage(-vconfig::maxVolt*0.5);
+			pros::delay(500);
+			intakeLow.move_voltage(0);
+			dt.move(-39, 1000);
+			dt.turnTo(-90, 500);
+			dt.move(-22, 750);
+			intakeLow.move_voltage(vconfig::maxVolt);
+			intakeHigh.move_voltage(vconfig::maxVolt);
+			break;
+		case vractolib::AutonType::ELIMS:
+			//elims auton
+			intakeLow.move_voltage(vconfig::maxVolt);
+			dt.moveToPoint(vunits::Pose{-12.0, 30.0, vunits::degToRad(0.0)}, 3000, 150, 4500);
+			dt.turnTo(-142);
+			dt.move(33);
+
+			//matchload
+			tongue.set_value(true);
+			dt.turnTo(-180); //90
+			intakeLow.move_voltage(vconfig::maxVolt);
+			dt.move(12.5);
+			pros::delay(750);
+
+			//outtake long
+			dt.move(-28.5);
+			tongue.set_value(false);
+			intakeLow.move_voltage(vconfig::maxVolt);
+			intakeHigh.move_voltage(vconfig::maxVolt);
+			pros::delay(1500);
+			intakeHigh.move_voltage(0);
+			intakeLow.move_voltage(0);
+
+			//push in
+			dt.move(8);
+			arm.set_value(false);
+			dt.turnTo(-123.69); //-135
+			dt.move(-11.25);
+			dt.turnTo(-180);
+			dt.move(-2);
+			arm.set_value(true);
+			dt.move(-17, 3000, 150, 4500);
+			break;
+		case vractolib::AutonType::SKILLS:
+			//skills auton code
+			break;
+	}
 }
 
 int spinDir = 0;
 
-//[0]=tongue, [1]=holdDescore
-bool wasPressed[2] = {false, false};
-bool pistonStates[2] = {false, false};
+//[0]=tongue, [1]=middle, [2]=arm
+bool wasPressed[3] = {false, false, false};
+bool pistonStates[3] = {false, true, true};
 
 int curTick = 0;
 int nextDetectTick = 0;
 int holdDir = 0;
 
 void opcontrol() {
-	//move optical system to always running loop in init
+	//TODO: move optical system to always running loop in init
 
 	pros::delay(3000);
-
-	//solo awp
-	// dt.move(29.75);
-	// dt.turnTo(-90); //90 for right
-	// dt.move(8.5);
-	// intakeLow.move_voltage(vconfig::maxVolt);
-	// pros::delay(2000);
-
-	// //outtake long
-	// dt.move(-29.5);
-	// intakeLow.move_voltage(vconfig::maxVolt*0.7);
-	// intakeHigh.move_voltage(vconfig::maxVolt);
-	// pros::delay(1500);
-	// intakeHigh.move_voltage(0);
-	// intakeLow.move_voltage(0);
-	// dt.move(5);
-	// dt.turnTo(142.5); //-60.0 for right
-	// //turn to mid
-	// intakeLow.move_voltage(vconfig::maxVolt);
-	// dt.move(23, 4000, 150, 4500);
-	// dt.turnTo(-180);
-	// dt.move(30);
-
-	//qual autons
-	// dt.move(29.5);
-	// dt.turnTo(-90); //90 for right
-	// dt.move(8.5);
-	// intakeLow.move_voltage(vconfig::maxVolt);
-	// pros::delay(2000);
-
-	// //outtake long
-	// dt.move(-29.5);
-	// intakeLow.move_voltage(vconfig::maxVolt*0.7);
-	// intakeHigh.move_voltage(vconfig::maxVolt);
-	// pros::delay(1500);
-	// intakeHigh.move_voltage(0);
-	// intakeLow.move_voltage(0);
-	// dt.move(20);
-	// dt.turnTo(135); //-135 for right
-
-	// // //mid low - right
-	// // intakeLow.move_voltage(vconfig::maxVolt);
-	// // dt.move(57, 4000, 150, 4500);
-	// // intakeLow.move_voltage(-vconfig::maxVolt*0.5);
-	// // pros::delay(3000);
-	// // intakeLow.move_voltage(0);
-
-	// //mid low - left
-	// intakeLow.move_voltage(vconfig::maxVolt);
-	// dt.move(37, 4000, 150, 4500);
-	// pros::delay(500);
-	// dt.turnTo(-45);
-	// dt.move(-20);
-	// pros::delay(3000);
-	// intakeLow.move_voltage(0);
+	
+	autonomous();
 
 	while (true) {
 		//drive
@@ -203,19 +228,39 @@ void opcontrol() {
 		//bottom 2 intake rollers
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) && master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intakeLow.move_voltage(vconfig::maxVolt);
+			if (!pistonStates[1]) {
+				pistonStates[1] = true;
+				middle.set_value(pistonStates[1]);
+			}
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			//outtake toplow
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeHigh.move_voltage(-vconfig::maxVolt);
+			if (pistonStates[1]) {
+				pistonStates[1] = false;
+				middle.set_value(pistonStates[1]);
+			}
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			//outtake bottom
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeHigh.move_voltage(vconfig::maxVolt);
+			if (!pistonStates[1]) {
+				pistonStates[1] = true;
+				middle.set_value(pistonStates[1]);
+			}
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
 			intakeLow.move_voltage(-vconfig::maxVolt);
+			if (!pistonStates[1]) {
+				pistonStates[1] = true;
+				middle.set_value(pistonStates[1]);
+			}
 		} else {
 			intakeLow.move_voltage(0);
 			intakeHigh.move_voltage(0);
+			if (!pistonStates[1]) {
+				pistonStates[1] = true;
+				middle.set_value(pistonStates[1]);
+			}
 		}
 
 		// if (curTick == nextDetectTick) {
@@ -257,8 +302,9 @@ void opcontrol() {
 		// 	intakeHigh.move_voltage(holdDir);
 		// 	// intakeMid.move_voltage(0);
 		// }
-	
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+
+		//TODO: piston class
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 			if (!wasPressed[0]) {
 				pistonStates[0] = !pistonStates[0];
 				tongue.set_value(pistonStates[0]);
@@ -268,14 +314,14 @@ void opcontrol() {
 			wasPressed[0] = false;
 		}
 
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
-			if (!wasPressed[1]) {
-				pistonStates[1] = !pistonStates[1];
-				holdDescore.set_value(pistonStates[1]);
-				wasPressed[1] = true;
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
+			if (!wasPressed[2]) {
+				pistonStates[2] = !pistonStates[2];
+				arm.set_value(pistonStates[2]);
+				wasPressed[2] = true;
 			}
 		} else {
-			wasPressed[1] = false;
+			wasPressed[2] = false;
 		}
 
 
