@@ -1,4 +1,6 @@
 #include "main.h"
+#include "../include/liblvgl/lvgl.h"
+#include "./comic_sans.c"
 #include <string>
 using namespace pros;
 
@@ -51,18 +53,32 @@ void on_center_button() {
 	pressed = !pressed;
 	if (pressed) {
 		isBlue = !isBlue;
-		lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
+		// lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
 		pros::delay(500);
 	}
 }
 
-void initialize() {
-	lcd::initialize();
-	lcd::set_text(1, "Salutations!");
+static void btn_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * btn = (lv_obj_t *) lv_event_get_target(e);
+    if(code == LV_EVENT_CLICKED) {
+        int cnt = 0;
+        cnt++;
 
-	lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
-	lcd::set_text(3, "color sort subsytem not running");
-	lcd::register_btn1_cb(on_center_button);
+        /*Get the first child of the button which is the label and change its text*/
+        lv_obj_t * label = lv_obj_get_child(btn, 0);
+        lv_label_set_text_fmt(label, "Button: %d", cnt);
+    }
+}
+
+void initialize() {
+	// lcd::initialize();
+	// lcd::set_text(1, "Salutations!");
+
+	// lcd::set_text(2, isBlue ? "Blue Alliance" : "Red Alliance");
+	// lcd::set_text(3, "color sort subsytem not running");
+	// lcd::register_btn1_cb(on_center_button);
 
 	dt.init();
 	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
@@ -72,12 +88,96 @@ void initialize() {
 
 	intakeHigh.set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD);
 
-	autonManager.selectAuton(vractolib::AutonType::QUALS);
+	autonManager.selectAuton(vractolib::AutonType::ELIMS);
+
+	lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0x003a57), LV_PART_MAIN);
+	// lv_font_t *my_font = lv_binfont_create("./comic_sans.bin");
+    /*Create a white label, set its text and align it to the center*/
+    // lv_obj_t * label = lv_label_create(lv_screen_active());
+    // lv_label_set_text(label, "hi");
+	// lv_obj_set_style_text_font(label, &comic_sans, LV_PART_MAIN);
+    // lv_obj_set_style_text_color(lv_screen_active(), lv_color_hex(0xffffff), LV_PART_MAIN);
+    // lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+
+	// lv_obj_t * btn = lv_button_create(lv_screen_active());     /*Add a button the current screen*/
+    // lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
+    // lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
+    // lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
+
+    // lv_obj_t * label2 = lv_label_create(btn);          /*Add a label to the button*/
+    // lv_label_set_text(label2, "Button");                     /*Set the labels text*/
+    // lv_obj_center(label2);
+
+	static int32_t col_dsc[] = {70, 70, 70, LV_GRID_TEMPLATE_LAST};
+    static int32_t row_dsc[] = {50, 50, LV_GRID_TEMPLATE_LAST};
+
+    /*Create a container with grid*/
+    lv_obj_t * cont = lv_obj_create(lv_screen_active());
+    lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
+    lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
+    lv_obj_set_size(cont, 300, 220);
+    lv_obj_center(cont);
+    lv_obj_set_layout(cont, LV_LAYOUT_GRID);
+
+    lv_obj_t * label;
+    lv_obj_t * obj;
+
+    uint32_t i;
+    for(i = 0; i < 6; i++) {
+        uint8_t col = i % 3;
+        uint8_t row = i / 3;
+
+        obj = lv_button_create(cont);
+        /*Stretch the cell horizontally and vertically too
+         *Set span to 1 to make the cell 1 column/row sized*/
+        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+
+        label = lv_label_create(obj);
+
+		if (i == 0) {
+			lv_label_set_text_fmt(label, "LEFT", col, row);
+		} else {
+			switch (i) {
+				case 1:
+					lv_label_set_text_fmt(label, "NONE", col, row);
+					break;
+				case 2:
+					lv_label_set_text_fmt(label, "QUALS", col, row);
+					break;
+				case 3:
+					lv_label_set_text_fmt(label, "SOLO AWP", col, row);
+					break;
+				case 4:
+					lv_label_set_text_fmt(label, "ELIMS", col, row);
+					break;
+				case 5:
+					lv_label_set_text_fmt(label, "SKILLS", col, row);
+					break;
+				default:
+					lv_label_set_text_fmt(label, ":p", i, col, row);
+					break;
+			}
+		}
+
+		lv_obj_center(label);
+
+		lv_obj_add_event_cb(obj, [](lv_event_t * e) {
+			lv_event_code_t code = lv_event_get_code(e);
+			lv_obj_t * btn = (lv_obj_t *) lv_event_get_target(e);
+			if(code == LV_EVENT_CLICKED) {
+				/*Get the first child of the button which is the label and change its text*/
+				autonManager.toggleSide();
+
+				lv_obj_t * label = lv_obj_get_child(btn, 0);
+				lv_label_set_text_fmt(label, "%s", autonManager.getSide() == vractolib::Side::LEFT ? "LEFT" : "RIGHT");
+			}
+		}, LV_EVENT_ALL, NULL);
+    }
 
 	Task task{[] {
 		while (true) {
 			odom.update();
-			lcd::set_text(4, std::to_string(odom.getPose().x)+", "+std::to_string(odom.getPose().y)+", "+std::to_string(vunits::radToDeg(odom.getPose().theta)));
+			// lcd::set_text(4, std::to_string(odom.getPose().x)+", "+std::to_string(odom.getPose().y)+", "+std::to_string(vunits::radToDeg(odom.getPose().theta)));
 			delay(vconfig::updateRate);
 		}
 	}};
@@ -95,13 +195,13 @@ void autonomous() {
 			//qual autons
 			dt.move(29.5);
 			tongue.set_value(true);
-			dt.turnTo(90 * autonManager.sign());
-			dt.move(8.5);
+			dt.turnTo(-90 * autonManager.sign());
 			intakeLow.move_voltage(vconfig::maxVolt);
-			pros::delay(2000);
+			dt.move(9.5, 1000);
+			pros::delay(500);
 
 			//outtake long
-			dt.move(-29.5);
+			dt.move(-29.5, 1000);
 			tongue.set_value(false);
 			intakeLow.move_voltage(vconfig::maxVolt*0.7);
 			intakeHigh.move_voltage(vconfig::maxVolt);
@@ -109,32 +209,34 @@ void autonomous() {
 			intakeHigh.move_voltage(0);
 			intakeLow.move_voltage(0);
 			dt.move(20);
-			dt.turnTo(-135 * autonManager.sign());
+			dt.turnTo(135 * autonManager.sign());
 
 			//mid low
-			if (autonManager.getSide() == vractolib::Side::LEFT) {
-				intakeLow.move_voltage(vconfig::maxVolt);
-				dt.move(37, 4000, 150, 4500);
-				pros::delay(500);
-				dt.turnTo(-45);
-				middle.set_value(false);
-				dt.move(-20);
-				pros::delay(3000);
-				intakeLow.move_voltage(0);
-			} else {
-				intakeLow.move_voltage(vconfig::maxVolt);
-				dt.move(57, 4000, 150, 4500);
-				intakeLow.move_voltage(-vconfig::maxVolt*0.5);
-				pros::delay(3000);
-				intakeLow.move_voltage(0);
-			}
+			// if (autonManager.getSide() == vractolib::Side::LEFT) {
+			// 	intakeLow.move_voltage(vconfig::maxVolt);
+			// 	dt.move(37, 1500, 150, 4500);
+			// 	pros::delay(500);
+			// 	dt.turnTo(-45);
+			// 	middle.set_value(false);
+			// 	dt.move(-20, 1000);
+			// 	intakeHigh.move_voltage(vconfig::maxVolt);
+			// 	pros::delay(1000);
+			// 	dt.move(3);
+			// 	intakeLow.move_voltage(0);
+			// } else {
+			// 	intakeLow.move_voltage(vconfig::maxVolt);
+			// 	dt.move(57, 4000, 150, 4500);
+			// 	intakeLow.move_voltage(-vconfig::maxVolt*0.5);
+			// 	pros::delay(3000);
+			// 	intakeLow.move_voltage(0);
+			// }
 			
 			break;
 		case vractolib::AutonType::SAWP:
 			// solo awp - ONLY LEFT
 			dt.move(30.75);
 			dt.turnTo(-90);
-			dt.move(8.5, 500);
+			dt.move(9.5, 500);
 			intakeLow.move_voltage(vconfig::maxVolt);
 			pros::delay(500);
 
@@ -168,35 +270,36 @@ void autonomous() {
 		case vractolib::AutonType::ELIMS:
 			//elims auton
 			intakeLow.move_voltage(vconfig::maxVolt);
-			dt.moveToPoint(vunits::Pose{-12.0, 30.0, vunits::degToRad(0.0)}, 3000, 150, 4500);
-			dt.turnTo(-142);
-			dt.move(33);
+			dt.moveToPoint(vunits::Pose{-11.0, 30.0, vunits::degToRad(0.0)}, 3000, 150, 4500);
+			dt.turnTo(-142, 1250);
+			dt.move(36, 1250);
 
 			//matchload
 			tongue.set_value(true);
 			dt.turnTo(-180); //90
 			intakeLow.move_voltage(vconfig::maxVolt);
-			dt.move(12.5);
-			pros::delay(750);
+			dt.move(13.5, 800);
+			pros::delay(500);
 
 			//outtake long
-			dt.move(-28.5);
+			dt.move(-29.5, 1250);
 			tongue.set_value(false);
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeHigh.move_voltage(vconfig::maxVolt);
-			pros::delay(1500);
+			pros::delay(1250);
 			intakeHigh.move_voltage(0);
 			intakeLow.move_voltage(0);
 
 			//push in
-			dt.move(8);
+			dt.move(8.75);
 			arm.set_value(false);
 			dt.turnTo(-123.69); //-135
-			dt.move(-11.25);
+			dt.move(-11.5);
 			dt.turnTo(-180);
 			dt.move(-2);
 			arm.set_value(true);
 			dt.move(-17, 3000, 150, 4500);
+			dt.move(8, 1000, 150, 6000);
 			break;
 		case vractolib::AutonType::SKILLS:
 			//skills auton code
@@ -217,9 +320,9 @@ int holdDir = 0;
 void opcontrol() {
 	//TODO: move optical system to always running loop in init
 
-	pros::delay(3000);
+	// pros::delay(3000);
 	
-	autonomous();
+	// autonomous();
 
 	while (true) {
 		//drive
