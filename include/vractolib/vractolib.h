@@ -18,4 +18,6 @@
 #include "vractolib/algos/odom/trackingwheel.h"
 #include "vractolib/algos/odom/imu.h"
 
+#include "vractolib/autonmanager.h"
+
 #endif
