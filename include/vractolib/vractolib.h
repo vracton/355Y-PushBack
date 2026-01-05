@@ -20,4 +20,6 @@
 
 #include "vractolib/autonmanager.h"
 
+#include "vractolib/solenoid.h"
+
 #endif

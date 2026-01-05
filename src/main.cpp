@@ -13,10 +13,12 @@ Motor intakeLow(-12, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 Motor intakeHigh(-6, v5::MotorGearset::blue, v5::MotorUnits::degrees);
 
 //pneumatics
-adi::DigitalOut middle('a');
-adi::DigitalOut arm('b');
-adi::DigitalOut tongue('c');
-
+adi::DigitalOut middleRaw('a');
+adi::DigitalOut armRaw('b');
+adi::DigitalOut tongueRaw('c');
+vractolib::Solenoid middle(middleRaw);
+vractolib::Solenoid arm(armRaw);
+vractolib::Solenoid tongue(tongueRaw);
 
 //controller
 Controller master(E_CONTROLLER_MASTER);
@@ -82,13 +84,14 @@ void initialize() {
 
 	dt.init();
 	dt.setBrakeMode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST);
-	tongue.set_value(false);
-	middle.set_value(true);
-	arm.set_value(true);
+	tongue.set(false);
+	middle.set(true);
+	arm.set(true);
 
 	intakeHigh.set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD);
 
 	autonManager.selectAuton(vractolib::AutonType::ELIMS);
+	autonManager.setSide(vractolib::Side::RIGHT);
 
 	lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0x003a57), LV_PART_MAIN);
 	// lv_font_t *my_font = lv_binfont_create("./comic_sans.bin");
@@ -194,7 +197,7 @@ void autonomous() {
 		case vractolib::AutonType::QUALS:
 			//qual autons
 			dt.move(29.5);
-			tongue.set_value(true);
+			tongue.set(true);
 			dt.turnTo(-90 * autonManager.sign());
 			intakeLow.move_voltage(vconfig::maxVolt);
 			dt.move(9.5, 1000);
@@ -202,7 +205,7 @@ void autonomous() {
 
 			//outtake long
 			dt.move(-29.5, 1000);
-			tongue.set_value(false);
+			tongue.set(false);
 			intakeLow.move_voltage(vconfig::maxVolt*0.7);
 			intakeHigh.move_voltage(vconfig::maxVolt);
 			pros::delay(1500);
@@ -270,35 +273,36 @@ void autonomous() {
 		case vractolib::AutonType::ELIMS:
 			//elims auton
 			intakeLow.move_voltage(vconfig::maxVolt);
-			dt.moveToPoint(vunits::Pose{-11.0, 30.0, vunits::degToRad(0.0)}, 3000, 150, 4500);
-			dt.turnTo(-142, 1250);
-			dt.move(36, 1250);
+			dt.moveToPoint(vunits::Pose{-11.0 * autonManager.sign(), 30.0, vunits::degToRad(0.0)}, 3000, 150, 4500);
+			dt.turnTo(-142 * autonManager.sign(), 1250);
+			dt.move(33, 1250);
 
 			//matchload
-			tongue.set_value(true);
-			dt.turnTo(-180); //90
+			tongue.set(true);
+			dt.turnTo(-180, 1250); //90
 			intakeLow.move_voltage(vconfig::maxVolt);
-			dt.move(13.5, 800);
+			dt.move(15.0, 800);
 			pros::delay(500);
 
 			//outtake long
+			dt.turnTo(-180, 250); //90
 			dt.move(-29.5, 1250);
-			tongue.set_value(false);
+			tongue.set(false);
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeHigh.move_voltage(vconfig::maxVolt);
-			pros::delay(1250);
+			pros::delay(1750);
 			intakeHigh.move_voltage(0);
 			intakeLow.move_voltage(0);
 
 			//push in
-			dt.move(8.75);
-			arm.set_value(false);
-			dt.turnTo(-123.69); //-135
-			dt.move(-11.5);
-			dt.turnTo(-180);
-			dt.move(-2);
-			arm.set_value(true);
-			dt.move(-17, 3000, 150, 4500);
+			dt.move(8.75, 850);
+			arm.set(false);
+			dt.turnTo(-123.69, 800); //-135
+			dt.move(-11.5, 750);
+			dt.turnTo(-180, 750);
+			dt.move(-6, 500);
+			arm.set(true);
+			dt.move(-13, 1000, 150, 4500);
 			dt.move(8, 1000, 150, 6000);
 			break;
 		case vractolib::AutonType::SKILLS:
@@ -310,8 +314,8 @@ void autonomous() {
 int spinDir = 0;
 
 //[0]=tongue, [1]=middle, [2]=arm
-bool wasPressed[3] = {false, false, false};
-bool pistonStates[3] = {false, true, true};
+// bool wasPressed[3] = {false, false, false};
+// bool pistonStates[3] = {false, true, true};
 
 int curTick = 0;
 int nextDetectTick = 0;
@@ -329,41 +333,26 @@ void opcontrol() {
 		dt.arcadeDoubleStick(master);
 
 		//bottom 2 intake rollers
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) && master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intakeLow.move_voltage(vconfig::maxVolt);
-			if (!pistonStates[1]) {
-				pistonStates[1] = true;
-				middle.set_value(pistonStates[1]);
-			}
+			middle.set(true);
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			//outtake toplow
+			// outtake toplow
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeHigh.move_voltage(-vconfig::maxVolt);
-			if (pistonStates[1]) {
-				pistonStates[1] = false;
-				middle.set_value(pistonStates[1]);
-			}
+			middle.set(false);
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			//outtake bottom
 			intakeLow.move_voltage(vconfig::maxVolt);
 			intakeHigh.move_voltage(vconfig::maxVolt);
-			if (!pistonStates[1]) {
-				pistonStates[1] = true;
-				middle.set_value(pistonStates[1]);
-			}
+			middle.set(true);
 		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
 			intakeLow.move_voltage(-vconfig::maxVolt);
-			if (!pistonStates[1]) {
-				pistonStates[1] = true;
-				middle.set_value(pistonStates[1]);
-			}
+			middle.set(true);
 		} else {
 			intakeLow.move_voltage(0);
 			intakeHigh.move_voltage(0);
-			if (!pistonStates[1]) {
-				pistonStates[1] = true;
-				middle.set_value(pistonStates[1]);
-			}
+			middle.set(true);
 		}
 
 		// if (curTick == nextDetectTick) {
@@ -407,26 +396,8 @@ void opcontrol() {
 		// }
 
 		//TODO: piston class
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-			if (!wasPressed[0]) {
-				pistonStates[0] = !pistonStates[0];
-				tongue.set_value(pistonStates[0]);
-				wasPressed[0] = true;
-			}
-		} else {
-			wasPressed[0] = false;
-		}
-
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
-			if (!wasPressed[2]) {
-				pistonStates[2] = !pistonStates[2];
-				arm.set_value(pistonStates[2]);
-				wasPressed[2] = true;
-			}
-		} else {
-			wasPressed[2] = false;
-		}
-
+		tongue.toggleOn(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1));
+		arm.toggleOn(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y));
 
 		curTick++;
 		delay(20);
