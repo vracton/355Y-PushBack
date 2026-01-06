@@ -7,7 +7,7 @@ namespace vunits {
     template<typename T> class Vector3D {
         public:
             T x, y, z;
-
+            //TODO: need to make Vector2D
             Vector3D() : x(0.0), y(0.0), z(0.0) {}
             Vector3D(T x, T y, T z) : x(x), y(y), z(z) {}
 
