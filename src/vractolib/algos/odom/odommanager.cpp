@@ -11,6 +11,10 @@ namespace vractolib {
 		pose = startPose;
 	}
 
+	void OdomManager::setPose(const vunits::Pose& newPose) {
+		pose = newPose;
+	}
+
 	void OdomManager::reset() {
 		for (auto &wheel: horizWheels) {
 			wheel.reset();

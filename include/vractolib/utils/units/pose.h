@@ -26,9 +26,18 @@ namespace vunits {
             Pose rotatedBy(const double &angle) const {
                 double cosTheta = std::cos(angle);
                 double sinTheta = std::sin(angle);
-                double newX = cosTheta * x - sinTheta * y;
-                double newY = sinTheta * x + cosTheta * y;
+                double newX = cosTheta * x + sinTheta * y;
+                double newY = cosTheta * y - sinTheta * x;
                 return Pose(newX, newY, theta);
+            }
+
+            static double distance(const Pose &p1, const Pose &p2) {
+                return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
+            }
+
+            //TODO: figure out how to use this properly
+            static double angleBetween(const Pose &from, const Pose &to) {
+                return std::atan2(to.y - from.y, to.x - from.x);
             }
     };
 }
