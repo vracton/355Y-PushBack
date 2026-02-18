@@ -26,6 +26,8 @@ namespace vractolib {
 
             void reset();
             void init();
+            void setGains(PIDGains newGains);
+            PIDGains getGains() const;
 
             double update(double err);
     };

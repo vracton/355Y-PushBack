@@ -11,6 +11,14 @@ namespace vractolib {
         PID::reset();
     }
 
+    void PID::setGains(PIDGains newGains) {
+        gains = newGains;
+    }
+
+    PIDGains PID::getGains() const {
+        return gains;
+    }
+
     void PID::reset() {
         integral = 0;
         prevError = 0;

@@ -21,6 +21,10 @@ namespace vractolib {
         rightMotors.set_brake_mode_all(brakeMode);
     }
 
+    void Drivetrain::setTurnGains(vractolib::PIDGains gains) {
+        turnPID.setGains(gains);
+    }
+
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
         if (abs(turn) > vconfig::turnDeadzone || abs(forward) > vconfig::forwardDeadzone) {
             // TODO: scale these later
