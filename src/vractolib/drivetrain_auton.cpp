@@ -7,6 +7,7 @@ namespace vractolib {
         const double targetHeading = vunits::wrapToSignedRadians(vunits::degToRad(angle));
 
         const double aErr = vunits::degToRad(0.5); // acceptable error
+        const double minVoltErr = vunits::degToRad(2.0); // apply stiction floor only when farther from target
         int settledTicks = 0;
         int elapsedTicks = 0;
 
@@ -17,16 +18,31 @@ namespace vractolib {
             const double err = vunits::angleDiffRadians(curHeading, targetHeading);
             
             const double pidOut = turnPID.update(err);
-            
-            int volt = static_cast<int>((pidOut + (std::fabs(err) > aErr ? feedforward * (err > 0 ? 1 : -1) : 0)) * 100);
+            int volt = static_cast<int>(std::lround(pidOut * 100.0));
+
+            // use feedforward as a tapered minimum voltage floor to overcome stiction
+            const int minTurnVolt = std::abs(feedforward) * 100;
+            const int nearTurnVolt = std::max(100, minTurnVolt / 8);
+            const double absErr = std::fabs(err);
+            if (absErr > aErr && std::abs(volt) < minTurnVolt) {
+                const double rawScale = (absErr - aErr) / (minVoltErr - aErr);
+                const double floorScale = (rawScale < 0.0) ? 0.0 : ((rawScale > 1.0) ? 1.0 : rawScale);
+                const int taperedFloor = static_cast<int>(std::lround(minTurnVolt * floorScale));
+                const int appliedFloor = (absErr >= minVoltErr) ? minTurnVolt : std::max(nearTurnVolt, taperedFloor);
+                volt = (err > 0 ? 1 : -1) * appliedFloor;
+            }
+
             if (volt > maxVolt) volt = maxVolt;
             if (volt < -maxVolt) volt = -maxVolt;
 
             rightMotors.move_voltage(-volt);
             leftMotors.move_voltage(volt);
 
-            //TODO: reset after leaving acceptable error?
-            settledTicks += (std::fabs(err) <= aErr && std::abs(volt) <= maxVolt * 0.25) ? 1 : 0;
+            if (std::fabs(err) <= aErr && std::abs(volt) <= maxVolt * 0.25) {
+                settledTicks += 1;
+            } else {
+                settledTicks = 0;
+            }
 
 			// printf("err: %f, pidout: %f, volt: %d\n", vunits::radToDeg(err), pidOut, volt);
 
@@ -70,7 +86,11 @@ namespace vractolib {
             rightMotors.move_voltage(volt);
             leftMotors.move_voltage(volt);
 
-            settledTicks += (std::fabs(err) <= aErr && std::abs(volt) <= maxVolt * 0.15) ? 1 : 0;
+            if (std::fabs(err) <= aErr && std::abs(volt) <= maxVolt * 0.15) {
+                settledTicks += 1;
+            } else {
+                settledTicks = 0;
+            }
 
             pros::delay(vconfig::updateRate);
             elapsedTicks += 1;
@@ -147,7 +167,11 @@ namespace vractolib {
             rightMotors.move_voltage(static_cast<int>(right));
             leftMotors.move_voltage(static_cast<int>(left));
 
-            settledTicks += (std::fabs(distErr) <= maxDistErr && std::fabs(max) <= maxVolt * 0.15) ? 1 : 0;
+            if (std::fabs(distErr) <= maxDistErr && std::fabs(max) <= maxVolt * 0.15) {
+                settledTicks += 1;
+            } else {
+                settledTicks = 0;
+            }
 
             pros::delay(vconfig::updateRate);
             elapsedTicks += 1;
