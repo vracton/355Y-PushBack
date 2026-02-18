@@ -1,8 +1,25 @@
 #include "vractolib/solenoid.h"
 
 namespace vractolib {
-	void Solenoid::set(bool newState) {
-		state = newState;
+	Solenoid::Solenoid(pros::adi::DigitalOut &solenoid, bool defaultState) : solenoid(solenoid) {
+		this->state = defaultState;
+		Solenoid::setDefault(defaultState);
+	}
+
+	Solenoid::Solenoid(pros::adi::DigitalOut &solenoid) : Solenoid(solenoid, false) { };
+
+	void Solenoid::setDefault(bool defaultState) {
+		this->defaultState = defaultState;
+		solenoid.set_value(defaultState);
+	}
+
+	void Solenoid::enable() {
+		state = !defaultState;
+		solenoid.set_value(state);
+	}
+
+	void Solenoid::disable() {
+		state = defaultState;
 		solenoid.set_value(state);
 	}
 
@@ -12,7 +29,6 @@ namespace vractolib {
 	}
 
 	void Solenoid::toggleOn(bool cond) {
-		if (cond) 
-			toggle();
+		if (cond) toggle();
 	}
 }

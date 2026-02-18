@@ -7,12 +7,16 @@ namespace vractolib {
 	class Solenoid {
 		private:
 			pros::adi::DigitalOut &solenoid;
+			bool defaultState; //default state for disabled
 			bool state;
 
 		public:
-			Solenoid(pros::adi::DigitalOut &solenoid) : solenoid(solenoid), state(false) { };
+			Solenoid(pros::adi::DigitalOut &solenoid);
+			Solenoid(pros::adi::DigitalOut &solenoid, bool defaultState);
 
-			void set(bool newState);
+			void setDefault(bool defaultState);
+			void enable();
+			void disable();
 			void toggle();
 			void toggleOn(bool cond);
 	};
