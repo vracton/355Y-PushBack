@@ -13,12 +13,14 @@ namespace vractolib {
 
         double lastTotal;
 
+        bool reversed;
+
         /*
             Gets the current position of the tracking wheel in radians.
         */
         double getPos();
     public:
-        TrackingWheel(pros::Rotation &enc, double diam, double offset);
+        TrackingWheel(pros::Rotation &enc, double diam, double offset, bool reversed = false);
 
         double getDelta();
         double getOffset();
