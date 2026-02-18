@@ -26,14 +26,15 @@ namespace vractolib {
 
         //setters
         void setBrakeMode(pros::motor_brake_mode_e brakeMode);
+        void setTurnGains(vractolib::PIDGains gains);
 
         //auton
-        void turnTo(double angle, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 14);
-        void move(double distance, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 14);
-        void pointTowards(vunits::Pose pose, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 14);
-        void moveToPoint(vunits::Pose pose, bool isBackwards = false, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 14);
+        void turnTo(double angle, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
+        void move(double distance, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
+        void pointTowards(vunits::Pose pose, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
+        void moveToPoint(vunits::Pose pose, bool isBackwards = false, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
         
-        void moveToPose(vunits::Pose pose, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 14);
+        void moveToPose(vunits::Pose pose, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
 
         //control methods
         void arcade(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);
