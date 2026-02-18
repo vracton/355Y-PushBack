@@ -27,6 +27,7 @@ namespace vractolib {
         //setters
         void setBrakeMode(pros::motor_brake_mode_e brakeMode);
         void setTurnGains(vractolib::PIDGains gains);
+        void setLatGains(vractolib::PIDGains gains);
 
         //auton
         void turnTo(double angle, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);

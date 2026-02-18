@@ -25,6 +25,10 @@ namespace vractolib {
         turnPID.setGains(gains);
     }
 
+    void Drivetrain::setLatGains(vractolib::PIDGains gains) {
+        latPID.setGains(gains);
+    }
+
     void Drivetrain::arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt) {
         if (abs(turn) > vconfig::turnDeadzone || abs(forward) > vconfig::forwardDeadzone) {
             // TODO: scale these later
