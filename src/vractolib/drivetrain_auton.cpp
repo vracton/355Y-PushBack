@@ -1,8 +1,24 @@
 #include "vractolib/drivetrain.h"
+#include <algorithm>
 #include <cmath>
 #include <string>
 
 namespace vractolib {
+    int Drivetrain::applyFeedforwardFloor(int pidVolt, double err, double acceptableErr, double fullFloorErr, int feedforward, int minNearVolt, int nearDivisor) const {
+        const int minFloorVolt = std::abs(feedforward) * 100;
+        if (minFloorVolt <= 0 || nearDivisor <= 0 || fullFloorErr <= acceptableErr) return pidVolt;
+
+        const double absErr = std::fabs(err);
+        if (absErr <= acceptableErr || std::abs(pidVolt) >= minFloorVolt) return pidVolt;
+
+        const int nearFloorVolt = std::max(minNearVolt, minFloorVolt / nearDivisor);
+        const double rawScale = (absErr - acceptableErr) / (fullFloorErr - acceptableErr);
+        const double floorScale = (rawScale < 0.0) ? 0.0 : ((rawScale > 1.0) ? 1.0 : rawScale);
+        const int taperedFloor = static_cast<int>(std::lround(minFloorVolt * floorScale));
+        const int appliedFloor = (absErr >= fullFloorErr) ? minFloorVolt : std::max(nearFloorVolt, taperedFloor);
+        return (err > 0 ? 1 : -1) * appliedFloor;
+    }
+
     void Drivetrain::turnTo(double angle, int timeout, int settleTime, int maxVolt, int feedforward) {
         const double targetHeading = vunits::wrapToSignedRadians(vunits::degToRad(angle));
 
@@ -18,19 +34,7 @@ namespace vractolib {
             const double err = vunits::angleDiffRadians(curHeading, targetHeading);
             
             const double pidOut = turnPID.update(err);
-            int volt = static_cast<int>(std::lround(pidOut * 100.0));
-
-            // use feedforward as a tapered minimum voltage floor to overcome stiction
-            const int minTurnVolt = std::abs(feedforward) * 100;
-            const int nearTurnVolt = std::max(100, minTurnVolt / 8);
-            const double absErr = std::fabs(err);
-            if (absErr > aErr && std::abs(volt) < minTurnVolt) {
-                const double rawScale = (absErr - aErr) / (minVoltErr - aErr);
-                const double floorScale = (rawScale < 0.0) ? 0.0 : ((rawScale > 1.0) ? 1.0 : rawScale);
-                const int taperedFloor = static_cast<int>(std::lround(minTurnVolt * floorScale));
-                const int appliedFloor = (absErr >= minVoltErr) ? minTurnVolt : std::max(nearTurnVolt, taperedFloor);
-                volt = (err > 0 ? 1 : -1) * appliedFloor;
-            }
+            int volt = applyFeedforwardFloor(static_cast<int>(std::lround(pidOut * 100.0)), err, aErr, minVoltErr, feedforward);
 
             if (volt > maxVolt) volt = maxVolt;
             if (volt < -maxVolt) volt = -maxVolt;
@@ -44,22 +48,20 @@ namespace vractolib {
                 settledTicks = 0;
             }
 
-			// printf("err: %f, pidout: %f, volt: %d\n", vunits::radToDeg(err), pidOut, volt);
-
             pros::delay(vconfig::updateRate);
             elapsedTicks += 1;
         }
 
         rightMotors.brake();
         leftMotors.brake();
-        // printf("final heading: %f, elapsed: %d, settled: %d\n", vunits::radToDeg(odom->getPose().theta), elapsedTicks, settledTicks);
     }
 
     void Drivetrain::move(double distance, int timeout, int settleTime, int maxVolt, int feedforward) {
         const vunits::Pose startPose = odom->getPose();
         const double targetDist = distance;
 
-        const double aErr = 0.2; // acceptable error
+        const double aErr = 0.25; // acceptable error
+        const double minVoltErr = 4.0; // apply full floor at and beyond this error
 
         int settledTicks = 0;
         int elapsedTicks = 0;
@@ -77,9 +79,7 @@ namespace vractolib {
             const double err = targetDist - curDist;
             const double pidOut = latPID.update(err);
 
-            // printf("pidout: %f, err: %f, dist: %f\n", pidOut, err, curDist);
-
-            int volt = static_cast<int>((pidOut + (std::fabs(err) > aErr ? feedforward * (err > 0 ? 1 : -1) : 0)) * 100);
+            int volt = applyFeedforwardFloor(static_cast<int>(std::lround(pidOut * 100.0)), err, aErr, minVoltErr, feedforward);
             if (volt > maxVolt) volt = maxVolt;
             if (volt < -maxVolt) volt = -maxVolt;
 
@@ -98,14 +98,6 @@ namespace vractolib {
 
         rightMotors.brake();
         leftMotors.brake();
-        const vunits::Pose curPose = odom->getPose();
-
-        double curDist = std::sqrt(std::pow(curPose.x - startPose.x, 2) + std::pow(curPose.y - startPose.y, 2));
-        if (targetDist < 0) {
-            curDist = -curDist;
-        }
-
-        // printf("final dist: %f, elapsed: %d, settled: %d\n", curDist, elapsedTicks, settledTicks);
     }
 
     void Drivetrain::pointTowards(vunits::Pose pose, int timeout, int settleTime, int maxVolt, int feedforward) {

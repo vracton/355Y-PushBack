@@ -14,6 +14,7 @@ namespace vractolib {
         pros::MotorGroup &rightMotors;
         vractolib::PID latPID, turnPID;
         vractolib::OdomManager* odom;
+        int applyFeedforwardFloor(int pidVolt, double err, double acceptableErr, double fullFloorErr, int feedforward, int minNearVolt = 100, int nearDivisor = 8) const;
 
         void arcade_handle_input(int forward, int turn, std::function<int(int)> mappedVolt);
         void cheese_handle_input(int forward, int curve, std::function<int(int)> mappedVolt);
@@ -31,7 +32,7 @@ namespace vractolib {
 
         //auton
         void turnTo(double angle, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
-        void move(double distance, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
+        void move(double distance, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt * 0.67, int feedforward = 13);
         void pointTowards(vunits::Pose pose, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
         void moveToPoint(vunits::Pose pose, bool isBackwards = false, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
         
