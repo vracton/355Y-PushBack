@@ -67,6 +67,10 @@ namespace vunits {
                 z /= s;
                 return *this;
             }
+
+            double magnitude() const {
+                return std::sqrt(x * x + y * y + z * z);
+            }
     };
 }
 
