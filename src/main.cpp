@@ -27,13 +27,13 @@ vractolib::Solenoid outtakeDivider(outtakeDividerRaw, false);
 Controller master(E_CONTROLLER_MASTER);
 
 //pid gains
-vractolib::PIDGains latGains = {6.0, 0.0, 1.0};
+vractolib::PIDGains latGains = {27.0, 0.0, 1.4};
 vractolib::PIDGains turnGains = {92.0, 0.0, 8.4};
 
 Rotation horizEnc(7);
 Rotation vertEnc(20);
-vractolib::TrackingWheel horiz(horizEnc, 2, 5.5);
-vractolib::TrackingWheel vert(vertEnc, 2, 0.25);
+vractolib::TrackingWheel horiz(horizEnc, 2, 5.5, true);
+vractolib::TrackingWheel vert(vertEnc, 2, 0.25, true);
 std::vector<vractolib::TrackingWheel> horizWheels = {horiz};
 std::vector<vractolib::TrackingWheel> vertWheels = {vert};
 IMU imuSensor(2);
@@ -349,28 +349,31 @@ void opcontrol() {
 
 		bool changedTurnGains = false;
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
-			if (selectedTurnGain == 0) turnGains.kP += 1.0;
-			else if (selectedTurnGain == 1) turnGains.kI += 1.0;
-			else turnGains.kD += 0.1;
+			if (selectedTurnGain == 0) latGains.kP += 1.0;
+			else if (selectedTurnGain == 1) latGains.kI += 1.0;
+			else latGains.kD += 0.1;
 			changedTurnGains = true;
 		}
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-			if (selectedTurnGain == 0) turnGains.kP -= 1.0;
-			else if (selectedTurnGain == 1) turnGains.kI -= 1.0;
-			else turnGains.kD -= 0.1;
+			if (selectedTurnGain == 0) latGains.kP -= 1.0;
+			else if (selectedTurnGain == 1) latGains.kI -= 1.0;
+			else latGains.kD -= 0.1;
 			changedTurnGains = true;
 		}
 		if (changedTurnGains) {
-			dt.setTurnGains(turnGains);
+			dt.setLatGains(latGains);
 		}
 
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
-			const double currentHeadingDeg = vunits::radToDeg(odom.getPose().theta);
-			dt.turnTo(vunits::wrapToSignedDegrees(currentHeadingDeg + 60.0));
-			master.print(0, 0, "delta: %.2f", vunits::radToDeg(odom.getPose().theta - vunits::degToRad(currentHeadingDeg)));
+			// const double currentHeadingDeg = vunits::radToDeg(odom.getPose().theta);
+			// dt.turnTo(vunits::wrapToSignedDegrees(currentHeadingDeg + 60.0));
+			// master.print(0, 0, "delta: %.2f", vunits::radToDeg(odom.getPose().theta - vunits::degToRad(currentHeadingDeg)));
+			vunits::Pose curPos = odom.getPose();
+			dt.move(10.0);
+			master.print(0, 0, "delta: %.2f", vunits::Pose::distance(curPos, odom.getPose()));
 		}
 
-		std::snprintf(gainLine, sizeof(gainLine), "Sel:%s P:%.1f I:%.1f D:%.1f", gainNames[selectedTurnGain], turnGains.kP, turnGains.kI, turnGains.kD);
+		std::snprintf(gainLine, sizeof(gainLine), "Sel:%s P:%.1f I:%.1f D:%.1f", gainNames[selectedTurnGain], latGains.kP, latGains.kI, latGains.kD);
 		lcd::set_text(5, gainLine);
 
 		//drive
