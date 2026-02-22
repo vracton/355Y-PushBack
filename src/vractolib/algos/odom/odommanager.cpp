@@ -50,11 +50,11 @@ namespace vractolib {
 		
 		// if we have 2 horizontal/2 vertical wheels, we can employ a more accurate method of calculating heading, but since we do not plan to do this, we will forgo it for now
 
-		vunits::Pose local = vunits::Pose(horiz[0].first, vert[0].first, 0.0);
+		vunits::Pose local = vunits::Pose(vert[0].first, -horiz[0].first, 0.0);
 
 		if (std::fabs(dTheta) > 1e-6) {
 			local /= dTheta;
-			local -= vunits::Pose(horiz[0].second, vert[0].second, 0.0);
+			local -= vunits::Pose(vert[0].second, horiz[0].second, 0.0);
 			local *= 2.0 * std::sin(dTheta / 2);
 		}
 		

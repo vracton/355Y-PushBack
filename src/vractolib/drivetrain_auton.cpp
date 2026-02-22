@@ -113,7 +113,7 @@ namespace vractolib {
     }
 
     void Drivetrain::pointTowards(vunits::Pose pose, int timeout, int settleTime, int maxVolt, int feedforward) {
-        const double targetAngle = std::atan2(pose.x - odom->getPose().x, pose.y - odom->getPose().y); //swapped because we don't use standard unit circle for heading
+        const double targetAngle = std::atan2(pose.y - odom->getPose().y, pose.x - odom->getPose().x);
 
         Drivetrain::turnTo(vunits::radToDeg(targetAngle), timeout, settleTime, maxVolt, feedforward);
     }
@@ -137,7 +137,7 @@ namespace vractolib {
             const double dx = pose.x - curPose.x;
             const double dy = pose.y - curPose.y;
             const double dist = std::hypot(dx, dy);
-            double targetAngle = std::atan2(dx, dy); // swapped because we do not use standard unit-circle heading
+            double targetAngle = std::atan2(dy, dx);
 
             if (isBackwards) {
                 targetAngle = vunits::wrapToSignedRadians(targetAngle + vunits::PI);
@@ -228,8 +228,8 @@ namespace vractolib {
 
             if (!atPosition) {
                 //target a point behind final pose along final heading
-                const double hX = std::sin(pose.theta);
-                const double hY = std::cos(pose.theta);
+                const double hX = std::cos(pose.theta);
+                const double hY = std::sin(pose.theta);
                 const double lookahead = std::clamp(lead * dist, 0.0, maxLookahead);
 
                 double carrotX = pose.x - hX * lookahead;
@@ -239,7 +239,7 @@ namespace vractolib {
                     carrotY = pose.y;
                 }
 
-                const double targetAngle = std::atan2(carrotX - curPose.x, carrotY - curPose.y); // swapped for this heading convention
+                const double targetAngle = std::atan2(carrotY - curPose.y, carrotX - curPose.x);
                 const double headErr = vunits::angleDiffRadians(curPose.theta, targetAngle);
                 const double driveErr = dist * std::cos(headErr);
 

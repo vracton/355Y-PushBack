@@ -26,8 +26,8 @@ namespace vunits {
             Pose rotatedBy(const double &angle) const {
                 double cosTheta = std::cos(angle);
                 double sinTheta = std::sin(angle);
-                double newX = cosTheta * x + sinTheta * y;
-                double newY = cosTheta * y - sinTheta * x;
+                double newX = cosTheta * x - sinTheta * y;
+                double newY = sinTheta * x + cosTheta * y;
                 return Pose(newX, newY, theta);
             }
 

@@ -9,7 +9,7 @@ namespace vractolib {
     class IMU {
     private:
         pros::IMU &imu;
-        double offset; //offset from robot heading, +CCW
+        double offset; //heading offset in radians, +CCW
 
         bool useYaw; //true: use heading(x), false: use position(z)
         double lastHeading;

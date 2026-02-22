@@ -9,7 +9,7 @@ namespace vractolib {
         } else {
             heading = imu.get_rotation();
         }
-        return vunits::wrapToSignedRadians(vunits::degToRad(heading) - offset);
+        return vunits::wrapToSignedRadians(offset - vunits::degToRad(heading));
     }
 
     //returns change in heading since last call in radians
