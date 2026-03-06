@@ -36,7 +36,7 @@ namespace vractolib {
         void pointTowards(vunits::Pose pose, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
         void moveToPoint(vunits::Pose pose, bool isBackwards = false, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
         
-        void moveToPose(vunits::Pose pose, double lead = 0.5, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
+        void moveToPose(vunits::Pose pose, double lead, bool isBackwards = false, int timeout = 3000, int settleTime = 150, int maxVolt = vconfig::maxVolt, int feedforward = 13);
 
         //control methods
         void arcade(pros::Controller controller, std::function<int(int)> mappedVolt = linearVoltMap);
